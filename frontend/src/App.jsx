@@ -1,12 +1,12 @@
 
-import './App.css'
+import SupRegister from './componets/supRegister'
 
 function App() {
 
 
   return (
     <>
-    
+    <SupRegister/>
     </>
   )
 }
