@@ -1,4 +1,4 @@
-import { createElement, useState } from 'react'
+﻿import { createElement, useState } from 'react'
 import axios from 'axios'
 import { FaBoxOpen, FaEnvelope, FaIndustry, FaLock, FaMapMarkerAlt, FaPhoneAlt, FaTruck } from 'react-icons/fa'
 import { ToastContainer, toast } from 'react-toastify'
@@ -171,16 +171,16 @@ function SupRegister() {
               <div className="sup-register__panel-overlay" />
               <div className="sup-register__panel-content">
                 <span className="sup-register__eyebrow">
-                Supplier Onboarding Portal
+                  Supplier Onboarding Portal
                 </span>
 
                 <div className="mb-4">
                   <h1 className="sup-register__title">
-                  Register your business and start supplying with confidence.
+                    Register your business and start supplying with confidence.
                   </h1>
                   <p className="sup-register__description">
-                  Submit your supplier profile, materials catalog, and contact details through a clean,
-                  verified registration workflow built for modern procurement teams.
+                    Submit your supplier profile, materials catalog, and contact details through a clean,
+                    verified registration workflow built for modern procurement teams.
                   </p>
                 </div>
 
@@ -190,15 +190,15 @@ function SupRegister() {
                     <ul className="sup-register__checklist-list mb-0">
                       <li>
                         <span className="sup-register__bullet" />
-                    Verified business and supplier contact details
+                        Verified business and supplier contact details
                       </li>
                       <li>
                         <span className="sup-register__bullet" />
-                    Materials and product categories supplied
+                        Materials and product categories supplied
                       </li>
                       <li>
                         <span className="sup-register__bullet" />
-                    Secure password for portal access
+                        Secure password for portal access
                       </li>
                     </ul>
                   </div>
@@ -212,101 +212,101 @@ function SupRegister() {
               <div className="mb-4">
                 <h2 className="sup-register__form-title">Supplier Registration</h2>
                 <p className="sup-register__form-subtitle mb-0">
-                Complete the form below to create your supplier account.
+                  Complete the form below to create your supplier account.
                 </p>
               </div>
 
-            {successMessage ? (
-              <div className="alert alert-success sup-register__alert" role="alert">
-                {successMessage}
-              </div>
-            ) : null}
+              {successMessage ? (
+                <div className="alert alert-success sup-register__alert" role="alert">
+                  {successMessage}
+                </div>
+              ) : null}
 
-            {serverError ? (
-              <div className="alert alert-danger sup-register__alert" role="alert">
-                {serverError}
-              </div>
-            ) : null}
+              {serverError ? (
+                <div className="alert alert-danger sup-register__alert" role="alert">
+                  {serverError}
+                </div>
+              ) : null}
 
               <form onSubmit={handleSubmit} className="row g-4">
-              <Field
-                label="Supplier Name"
-                name="supplierName"
-                value={formData.supplierName}
-                onChange={handleChange}
-                error={errors.supplierName}
-                icon={FaTruck}
-              />
-
-              <Field
-                label="Company Name"
-                name="companyName"
-                value={formData.companyName}
-                onChange={handleChange}
-                error={errors.companyName}
-                icon={FaIndustry}
-              />
-
-              <Field
-                label="Email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                error={errors.email}
-                icon={FaEnvelope}
-              />
-
-              <Field
-                label="Phone"
-                name="phone"
-                type="tel"
-                value={formData.phone}
-                onChange={handleChange}
-                error={errors.phone}
-                icon={FaPhoneAlt}
-              />
-
-              <TextAreaField
-                label="Address"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                error={errors.address}
-                icon={FaMapMarkerAlt}
-              />
-
-              <Field
-                label="Materials Supplied"
-                name="materialsSupplied"
-                value={formData.materialsSupplied}
-                onChange={handleChange}
-                error={errors.materialsSupplied}
-                icon={FaBoxOpen}
-              />
-
-              <div className="col-12">
                 <Field
-                  label="Password"
-                  name="password"
-                  type="password"
-                  value={formData.password}
+                  label="Supplier Name"
+                  name="supplierName"
+                  value={formData.supplierName}
                   onChange={handleChange}
-                  error={errors.password}
-                  icon={FaLock}
+                  error={errors.supplierName}
+                  icon={FaTruck}
                 />
-              </div>
 
-              <div className="col-12 pt-2">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="btn sup-register__submit-btn w-100"
-                >
-                  {loading ? <span className="spinner-border spinner-border-sm me-2" aria-hidden="true" /> : null}
-                  {loading ? 'Submitting Registration...' : 'Register Supplier'}
-                </button>
-              </div>
+                <Field
+                  label="Company Name"
+                  name="companyName"
+                  value={formData.companyName}
+                  onChange={handleChange}
+                  error={errors.companyName}
+                  icon={FaIndustry}
+                />
+
+                <Field
+                  label="Email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  error={errors.email}
+                  icon={FaEnvelope}
+                />
+
+                <Field
+                  label="Phone"
+                  name="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  error={errors.phone}
+                  icon={FaPhoneAlt}
+                />
+
+                <TextAreaField
+                  label="Address"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  error={errors.address}
+                  icon={FaMapMarkerAlt}
+                />
+
+                <Field
+                  label="Materials Supplied"
+                  name="materialsSupplied"
+                  value={formData.materialsSupplied}
+                  onChange={handleChange}
+                  error={errors.materialsSupplied}
+                  icon={FaBoxOpen}
+                />
+
+                <div className="col-12">
+                  <Field
+                    label="Password"
+                    name="password"
+                    type="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    error={errors.password}
+                    icon={FaLock}
+                  />
+                </div>
+
+                <div className="col-12 pt-2">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="btn sup-register__submit-btn w-100"
+                  >
+                    {loading ? <span className="spinner-border spinner-border-sm me-2" aria-hidden="true" /> : null}
+                    {loading ? 'Submitting Registration...' : 'Register Supplier'}
+                  </button>
+                </div>
               </form>
             </div>
           </div>
