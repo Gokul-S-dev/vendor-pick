@@ -57,12 +57,12 @@ function AdminQuotations() {
 
         setQuotations(response.data?.quotations || [])
         if ((response.data?.quotations || []).length > 0) {
-          toast.success('Quotations loaded successfully.')
+          toast.success('Quotations loaded successfully.', { id: 'quotations-loaded' })
         }
       } catch (error) {
         const message = error.response?.data?.message || 'Failed to load quotations.'
         setErrorMessage(message)
-        toast.error(message)
+        toast.error(message, { id: 'quotations-load-error' })
       } finally {
         setLoading(false)
       }
