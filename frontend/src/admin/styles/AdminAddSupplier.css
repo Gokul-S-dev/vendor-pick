@@ -1,0 +1,58 @@
+.admin-add-supplier-page {
+  min-height: 100vh;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.16), transparent 32%),
+    #f8fafc;
+}
+
+.admin-add-supplier-title {
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.admin-add-supplier-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+}
+
+.admin-back-button {
+  font-weight: 600;
+  border-radius: 10px;
+}
+
+.admin-add-input {
+  border-radius: 10px;
+  border-color: #cbd5e1;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.admin-add-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
+  transform: translateY(-1px);
+}
+
+.admin-add-submit {
+  border-radius: 10px;
+  font-weight: 700;
+  padding: 0.55rem 1.2rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.admin-add-submit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.25);
+}
+
+.admin-add-submit:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .admin-add-supplier-page {
+    padding-top: 1rem;
+  }
+}

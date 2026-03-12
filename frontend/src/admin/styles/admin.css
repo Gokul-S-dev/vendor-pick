@@ -1,0 +1,264 @@
+/* =========================================
+   Admin Common Styles (Bootstrap-friendly)
+   Scope: Login, Dashboard, RFQ, Suppliers,
+   Quotations and shared admin UI blocks.
+========================================= */
+
+:root {
+  --admin-bg: #f5f7fb;
+  --admin-surface: #ffffff;
+  --admin-text: #0f172a;
+  --admin-muted: #64748b;
+  --admin-border: #e2e8f0;
+  --admin-primary: #2563eb;
+  --admin-primary-hover: #1d4ed8;
+  --admin-danger: #dc2626;
+  --admin-danger-hover: #b91c1c;
+  --admin-warning: #f59e0b;
+  --admin-success: #16a34a;
+  --admin-radius-lg: 16px;
+  --admin-radius-md: 12px;
+  --admin-shadow-sm: 0 4px 14px rgba(15, 23, 42, 0.06);
+  --admin-shadow-md: 0 10px 28px rgba(15, 23, 42, 0.12);
+}
+
+/* ----- Layout ----- */
+.admin-container {
+  min-height: 100vh;
+  background: radial-gradient(circle at top right, #eef2ff 0%, #f8fafc 45%, #f5f7fb 100%);
+  padding: 1.25rem;
+  color: var(--admin-text);
+}
+
+.admin-card {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-lg);
+  box-shadow: var(--admin-shadow-sm);
+  padding: 1.25rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--admin-shadow-md);
+}
+
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.admin-header h1,
+.admin-header h2,
+.admin-header h3,
+.admin-header h4,
+.admin-header h5,
+.admin-header h6 {
+  margin: 0;
+}
+
+/* ----- Dashboard cards ----- */
+.dashboard-card {
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-md);
+  padding: 1rem 1.1rem;
+  box-shadow: var(--admin-shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--admin-shadow-md);
+}
+
+.dashboard-number {
+  display: block;
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--admin-primary);
+}
+
+.dashboard-title {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--admin-muted);
+  margin-top: 0.35rem;
+}
+
+/* ----- Buttons (works with Bootstrap classes) ----- */
+.admin-btn {
+  border-radius: 10px;
+  font-weight: 600;
+  padding: 0.52rem 0.95rem;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.admin-btn:focus {
+  box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.2);
+}
+
+.admin-btn-primary {
+  background: var(--admin-primary);
+  border-color: var(--admin-primary);
+  color: #fff;
+}
+
+.admin-btn-primary:hover {
+  background: var(--admin-primary-hover);
+  border-color: var(--admin-primary-hover);
+  color: #fff;
+}
+
+.admin-btn-danger {
+  background: var(--admin-danger);
+  border-color: var(--admin-danger);
+  color: #fff;
+}
+
+.admin-btn-danger:hover {
+  background: var(--admin-danger-hover);
+  border-color: var(--admin-danger-hover);
+  color: #fff;
+}
+
+/* ----- Table styles ----- */
+.admin-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #fff;
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-md);
+  overflow: hidden;
+}
+
+.admin-table thead th {
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid var(--admin-border);
+  padding: 0.85rem 0.9rem;
+}
+
+.admin-table tbody td {
+  padding: 0.85rem 0.9rem;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.admin-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-table tbody tr {
+  transition: background-color 0.18s ease;
+}
+
+.admin-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+/* ----- Form styles ----- */
+.admin-label {
+  display: inline-block;
+  margin-bottom: 0.38rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.admin-input {
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.94rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-input:focus {
+  border-color: var(--admin-primary);
+  box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.18);
+  outline: none;
+}
+
+/* ----- Notifications ----- */
+.notification-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  background: #fff;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  padding: 0.75rem 0.85rem;
+  box-shadow: var(--admin-shadow-sm);
+}
+
+.notification-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 78px;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.73rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.notification-badge.rfq {
+  background: var(--admin-primary);
+}
+
+.notification-badge.deadline {
+  background: var(--admin-warning);
+  color: #111827;
+}
+
+.notification-badge.accepted {
+  background: var(--admin-success);
+}
+
+.notification-badge.rejected {
+  background: var(--admin-danger);
+}
+
+/* ----- Utility helpers ----- */
+.admin-muted {
+  color: var(--admin-muted);
+}
+
+.admin-gap-sm {
+  gap: 0.5rem;
+}
+
+.admin-gap-md {
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .admin-container {
+    padding: 0.9rem;
+  }
+
+  .admin-card {
+    padding: 1rem;
+    border-radius: 14px;
+  }
+
+  .dashboard-number {
+    font-size: 1.5rem;
+  }
+}

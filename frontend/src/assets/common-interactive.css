@@ -1,0 +1,161 @@
+/* =========================================================
+   Common Interactive + Animated Layer
+   Shared across Supplier and Admin modules
+========================================================= */
+
+:root {
+  --ui-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ui-fast: 160ms;
+  --ui-mid: 280ms;
+  --ui-slow: 520ms;
+  --ui-radius: 14px;
+  --ui-ring: 0 0 0 0.2rem rgba(59, 130, 246, 0.18);
+  --ui-shadow-soft: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --ui-shadow-hover: 0 16px 38px rgba(37, 99, 235, 0.18);
+}
+
+/* ---------- Motion presets ---------- */
+@keyframes uiFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes uiFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes uiPulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.26);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(37, 99, 235, 0);
+  }
+}
+
+.ui-fade-up {
+  animation: uiFadeUp var(--ui-slow) var(--ui-ease) both;
+}
+
+.ui-float {
+  animation: uiFloat 2.8s ease-in-out infinite;
+}
+
+.ui-pulse {
+  animation: uiPulseGlow 2s ease-in-out infinite;
+}
+
+/* ---------- Reusable interactive classes ---------- */
+.ui-card {
+  border-radius: var(--ui-radius);
+  box-shadow: var(--ui-shadow-soft);
+  transition: transform var(--ui-mid) var(--ui-ease), box-shadow var(--ui-mid) var(--ui-ease);
+}
+
+.ui-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--ui-shadow-hover);
+}
+
+.ui-btn {
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--ui-fast) var(--ui-ease), box-shadow var(--ui-fast) var(--ui-ease);
+}
+
+.ui-btn:hover {
+  transform: translateY(-1px);
+}
+
+.ui-btn:active {
+  transform: translateY(0);
+}
+
+.ui-btn:focus-visible,
+.ui-input:focus-visible {
+  outline: none;
+  box-shadow: var(--ui-ring);
+}
+
+.ui-input {
+  transition: border-color var(--ui-fast) var(--ui-ease), box-shadow var(--ui-fast) var(--ui-ease);
+}
+
+/* ---------- Auto-enhance existing project classes ---------- */
+.admin-card,
+.dashboard-card,
+.rfq-card,
+.sq-card,
+.sup-register__shell,
+.sup-login__card {
+  transition: transform var(--ui-mid) var(--ui-ease), box-shadow var(--ui-mid) var(--ui-ease), border-color var(--ui-mid) var(--ui-ease);
+}
+
+.admin-card:hover,
+.dashboard-card:hover,
+.rfq-card:hover,
+.sq-card:hover,
+.sup-register__shell:hover,
+.sup-login__card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--ui-shadow-hover);
+}
+
+.admin-btn,
+.sq-btn-submit,
+.sq-btn-cancel,
+.rfq-card__btn,
+.detail-modal__action,
+.detail-modal__dismiss,
+.sup-register__submit-btn,
+.sup-login__submit-btn {
+  transition: transform var(--ui-fast) var(--ui-ease), filter var(--ui-fast) var(--ui-ease), box-shadow var(--ui-fast) var(--ui-ease);
+}
+
+.admin-btn:hover,
+.sq-btn-submit:hover,
+.sq-btn-cancel:hover,
+.rfq-card__btn:hover,
+.detail-modal__action:hover,
+.detail-modal__dismiss:hover,
+.sup-register__submit-btn:hover,
+.sup-login__submit-btn:hover {
+  transform: translateY(-1px);
+  filter: saturate(1.05);
+}
+
+.admin-input,
+.sq-control,
+.dash-toolbar__search,
+.sup-register__control,
+.sup-login__control {
+  transition: border-color var(--ui-fast) var(--ui-ease), box-shadow var(--ui-fast) var(--ui-ease), background-color var(--ui-fast) var(--ui-ease);
+}
+
+/* ---------- Smooth page entry ---------- */
+#root {
+  animation: uiFadeUp 360ms var(--ui-ease) both;
+}
+
+/* ---------- Reduced motion support ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

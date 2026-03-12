@@ -285,11 +285,36 @@ function Dashboard() {
 
       <main className="dashboard-main container-fluid py-4">
         {/* Page title */}
-        <div className="dash-heading mb-4">
-          <h1 className="dash-heading__title">RFQ Dashboard</h1>
-          <p className="dash-heading__sub">
-            Manage your assigned Requests For Quotation
-          </p>
+        <div className="dash-heading mb-4 d-flex flex-wrap justify-content-between align-items-start gap-3">
+          <div>
+            <h1 className="dash-heading__title">RFQ Dashboard</h1>
+            <p className="dash-heading__sub">
+              Manage your assigned Requests For Quotation
+            </p>
+          </div>
+          <div className="d-flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="btn btn-outline-primary"
+              onClick={() => navigate('/supplier/quotations')}
+            >
+              View My Quotations
+            </button>
+            <button
+              type="button"
+              className="btn btn-outline-secondary"
+              onClick={() => navigate('/supplier/notifications')}
+            >
+              View Notifications
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => navigate('/supplier/profile')}
+            >
+              Manage Profile
+            </button>
+          </div>
         </div>
 
         {/* Stat bar */}

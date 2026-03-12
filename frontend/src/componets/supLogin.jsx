@@ -84,15 +84,23 @@ function SupLogin() {
       setLoading(true)
       setServerError('')
 
-      const response = await axios.post('/api/supplier/login', formData)
+      const response = await axios.post('http://localhost:3000/api/admin/login', formData)
       const token = response?.data?.token
+      const role = response?.data?.role
+      const redirectTo = response?.data?.redirectTo
 
       if (token) {
-        localStorage.setItem('supplierToken', token)
+        if (role === 'admin') {
+          localStorage.setItem('adminToken', token)
+        } else {
+          localStorage.setItem('supplierToken', token)
+        }
       }
 
+      const nextPath = redirectTo || (role === 'admin' ? '/admin/dashboard' : '/dashboard')
+
       toast.success('Login successful! Redirecting…')
-      setTimeout(() => navigate('/dashboard'), 1000)
+      setTimeout(() => navigate(nextPath), 1000)
     } catch (err) {
       const message =
         err.response?.status === 401

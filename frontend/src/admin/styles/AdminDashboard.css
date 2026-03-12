@@ -1,0 +1,71 @@
+.admin-dashboard-page {
+  min-height: 100vh;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+  background:
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.16), transparent 30%),
+    #f8fafc;
+}
+
+.admin-dashboard-heading {
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.admin-metric-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-metric-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 34px rgba(37, 99, 235, 0.14);
+}
+
+.admin-metric-title {
+  font-size: 0.84rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.admin-metric-value {
+  margin-bottom: 0;
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: #1d4ed8;
+}
+
+.admin-nav-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+}
+
+.admin-nav-button {
+  border-radius: 10px;
+  font-weight: 600;
+  padding: 0.55rem 0.95rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.admin-nav-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.22);
+}
+
+.admin-nav-button:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .admin-dashboard-page {
+    padding-top: 1rem;
+  }
+
+  .admin-metric-value {
+    font-size: 1.45rem;
+  }
+}
