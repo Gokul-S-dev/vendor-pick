@@ -1,6 +1,6 @@
 ﻿import { createElement, useState } from 'react'
 import axios from 'axios'
-import { FaBoxOpen, FaEnvelope, FaIndustry, FaLock, FaMapMarkerAlt, FaPhoneAlt, FaTruck } from 'react-icons/fa'
+import { FaBoxOpen, FaEnvelope, FaEye, FaEyeSlash, FaIndustry, FaLock, FaMapMarkerAlt, FaPhoneAlt, FaTruck } from 'react-icons/fa'
 import { ToastContainer, toast } from 'react-toastify'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'react-toastify/dist/ReactToastify.css'
@@ -17,7 +17,10 @@ const initialForm = {
 }
 
 function Field({ label, name, type = 'text', value, onChange, error, icon: Icon }) {
+  const [showPwd, setShowPwd] = useState(false)
   const iconNode = createElement(Icon, { className: 'sup-register__field-icon' })
+  const isPassword = type === 'password'
+  const inputType = isPassword ? (showPwd ? 'text' : 'password') : type
 
   return (
     <div className="col-md-6">
@@ -29,12 +32,22 @@ function Field({ label, name, type = 'text', value, onChange, error, icon: Icon 
         <input
           id={name}
           name={name}
-          type={type}
+          type={inputType}
           value={value}
           onChange={onChange}
           className="form-control sup-register__control"
           placeholder={`Enter ${label.toLowerCase()}`}
         />
+        {isPassword && (
+          <button
+            type="button"
+            className="sup-register__eye-btn"
+            onClick={() => setShowPwd((v) => !v)}
+            aria-label={showPwd ? 'Hide password' : 'Show password'}
+          >
+            {showPwd ? createElement(FaEyeSlash, {}) : createElement(FaEye, {})}
+          </button>
+        )}
       </div>
       {error ? <div className="invalid-feedback d-block">{error}</div> : null}
     </div>

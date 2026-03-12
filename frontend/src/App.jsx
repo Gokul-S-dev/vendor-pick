@@ -8,6 +8,7 @@ import Notifications from './componets/Notifications'
 import Profile from './componets/Profile'
 import AdminDashboard from './admin/AdminDashboard'
 import AdminAddSupplier from './admin/pages/AdminAddSupplier'
+import AdminQuotations from './admin/pages/AdminQuotations'
 
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
         {/* <Route path="/admin/login" element={<AdminLogin />} /> */}
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/suppliers" element={<AdminAddSupplier />} />
+        <Route path="/admin/quotations" element={<AdminQuotations />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>

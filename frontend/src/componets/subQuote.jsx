@@ -1,12 +1,11 @@
 ﻿import { useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
-// import axios from 'axios'  // Uncomment when backend is ready
+import axios from 'axios'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './subQuote.css'
 
 const INITIAL = {
   pricePerUnit:     '',
-  moq:              '',
   shippingCost:     '',
   deliveryLeadTime: '',
   tax:              '',
@@ -69,11 +68,6 @@ function SubmitQuotation() {
     else if (isNaN(form.pricePerUnit) || Number(form.pricePerUnit) <= 0)
       next.pricePerUnit = 'Enter a valid price greater than 0.'
 
-    if (!form.moq.toString().trim())
-      next.moq = 'Minimum Order Quantity is required.'
-    else if (!Number.isInteger(Number(form.moq)) || Number(form.moq) <= 0)
-      next.moq = 'MOQ must be a positive whole number.'
-
     if (!form.shippingCost.toString().trim())
       next.shippingCost = 'Shipping cost is required.'
     else if (isNaN(form.shippingCost) || Number(form.shippingCost) < 0)
@@ -97,8 +91,8 @@ function SubmitQuotation() {
 
     const payload = {
       rfqId,
+      supplierId: localStorage.getItem('supplierId'),
       pricePerUnit:     Number(form.pricePerUnit),
-      moq:              Number(form.moq),
       shippingCost:     Number(form.shippingCost),
       deliveryLeadTime: Number(form.deliveryLeadTime),
       tax:              form.tax ? Number(form.tax) : 0,
@@ -107,15 +101,10 @@ function SubmitQuotation() {
 
     try {
       setLoading(true)
-      /* ── TODO: replace with real API call ──────────────────────────
       const token = localStorage.getItem('supplierToken')
       await axios.post('/api/quotation/submit', payload, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      ─────────────────────────────────────────────────────────────── */
-      // Simulate API delay for temp mode
-      await new Promise((r) => setTimeout(r, 1000))
-      console.log('Quote payload (temp):', payload)
 
       setSuccess(true)
       setTimeout(() => navigate('/dashboard'), 2500)
@@ -210,14 +199,6 @@ function SubmitQuotation() {
               <div className="row g-4">
                 <div className="col-md-6">
                   <FormField
-                    id="moq" label="Minimum Order Quantity (MOQ)" type="number"
-                    value={form.moq} onChange={handleChange}
-                    error={errors.moq} placeholder="e.g. 3000"
-                    required
-                  />
-                </div>
-                <div className="col-md-6">
-                  <FormField
                     id="deliveryLeadTime" label="Delivery Lead Time" type="number"
                     value={form.deliveryLeadTime} onChange={handleChange}
                     error={errors.deliveryLeadTime} placeholder="e.g. 10"
@@ -272,13 +253,12 @@ function SubmitQuotation() {
             </div>
 
             {/* Preview summary */}
-            {(form.pricePerUnit || form.moq || form.shippingCost || form.deliveryLeadTime) && (
+            {(form.pricePerUnit || form.shippingCost || form.deliveryLeadTime) && (
               <div className="sq-preview">
                 <p className="sq-preview__title">Quote Preview</p>
                 <div className="row g-3">
                   {[
                     ['Price / unit', form.pricePerUnit ? '₹ ' + Number(form.pricePerUnit).toLocaleString() : '—'],
-                    ['MOQ',          form.moq           ? Number(form.moq).toLocaleString() + ' units'        : '—'],
                     ['Shipping',     form.shippingCost  ? '₹ ' + Number(form.shippingCost).toLocaleString()   : '—'],
                     ['Lead time',    form.deliveryLeadTime ? form.deliveryLeadTime + ' days'                   : '—'],
                     ['Tax',          form.tax           ? form.tax + '%'                                       : '0%'],

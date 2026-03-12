@@ -4,7 +4,7 @@ import axios from 'axios'
 import 'bootstrap/dist/css/bootstrap.min.css'
 
 const STATUS_CLASS = {
-  Submitted: 'bg-warning text-dark',
+  Pending: 'bg-warning text-dark',
   Accepted: 'bg-success',
   Rejected: 'bg-danger',
 }
@@ -22,10 +22,11 @@ function ViewQuotations() {
     const fetchQuotations = async () => {
       try {
         const token = localStorage.getItem('supplierToken')
-        const response = await axios.get('/api/quotation/supplier', {
+        const supplierId = localStorage.getItem('supplierId')
+        const response = await axios.get(`/api/quotation/supplier/${supplierId}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
-        setQuotations(response.data || [])
+        setQuotations(response.data?.quotations || [])
       } catch (err) {
         setError(err.response?.data?.message || 'Unable to fetch submitted quotations.')
       } finally {
@@ -74,7 +75,6 @@ function ViewQuotations() {
                       <th>RFQ ID</th>
                       <th>Material</th>
                       <th>Price / Unit</th>
-                      <th>MOQ</th>
                       <th>Shipping Cost</th>
                       <th>Delivery Lead Time</th>
                       <th>Status</th>
@@ -86,12 +86,11 @@ function ViewQuotations() {
                         <td className="fw-semibold">{q.rfqId}</td>
                         <td>{q.material}</td>
                         <td>{formatCurrency(q.pricePerUnit)}</td>
-                        <td>{Number(q.moq).toLocaleString('en-IN')}</td>
                         <td>{formatCurrency(q.shippingCost)}</td>
                         <td>{q.deliveryLeadTime} days</td>
                         <td>
                           <span className={`badge ${STATUS_CLASS[q.status] || 'bg-secondary'}`}>
-                            {q.status || 'Submitted'}
+                            {q.status || 'Pending'}
                           </span>
                         </td>
                       </tr>

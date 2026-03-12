@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
+import { FaEye, FaEyeSlash } from 'react-icons/fa'
 import 'bootstrap/dist/css/bootstrap.min.css'
 
 const INITIAL_PROFILE = {
@@ -19,14 +20,15 @@ function Profile() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const token = localStorage.getItem('supplierToken')
+        const supplierId = localStorage.getItem('supplierId')
         const response = await axios.get('/api/supplier/profile', {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${supplierId}`,
           },
         })
         setFormData({
@@ -57,7 +59,7 @@ function Profile() {
     setSuccess('')
 
     try {
-      const token = localStorage.getItem('supplierToken')
+      const supplierId = localStorage.getItem('supplierId')
       const payload = { ...formData }
       if (!payload.password.trim()) {
         delete payload.password
@@ -65,7 +67,7 @@ function Profile() {
 
       await axios.put('/api/supplier/profile', payload, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${supplierId}`,
         },
       })
 
@@ -133,14 +135,38 @@ function Profile() {
                 </div>
                 <div className="col-12">
                   <label className="form-label">Password (optional update)</label>
-                  <input
-                    name="password"
-                    type="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="form-control"
-                    placeholder="Leave blank to keep existing password"
-                  />
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      name="password"
+                      type={showPassword ? 'text' : 'password'}
+                      value={formData.password}
+                      onChange={handleChange}
+                      className="form-control"
+                      placeholder="Leave blank to keep existing password"
+                      style={{ paddingRight: '2.5rem' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      style={{
+                        position: 'absolute',
+                        right: '0.75rem',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'none',
+                        border: 'none',
+                        padding: 0,
+                        color: '#94a3b8',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        fontSize: '1rem',
+                      }}
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </button>
+                  </div>
                 </div>
                 <div className="col-12 d-flex justify-content-end">
                   <button type="submit" className="btn btn-primary" disabled={saving}>

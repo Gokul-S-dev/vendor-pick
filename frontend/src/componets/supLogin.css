@@ -133,6 +133,23 @@
   font-size: 0.98rem;
 }
 
+.sup-login__eye-btn {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-size: 0.98rem;
+  line-height: 1;
+  transition: color 0.2s ease;
+}
+.sup-login__eye-btn:hover {
+  color: #0ea5e9;
+}
+
 .sup-login__control,
 .sup-login__control:focus {
   border: 0;

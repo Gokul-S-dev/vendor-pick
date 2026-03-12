@@ -52,6 +52,10 @@ function RfqCard({ rfq, onView, onSubmitQuote }) {
           <span className="rfq-card__meta-label">Deadline</span>
           <span className="rfq-card__meta-value">{formatDeadline(rfq.deadline)}</span>
         </div>
+        <div className="rfq-card__meta-item">
+          <span className="rfq-card__meta-label">Location</span>
+          <span className="rfq-card__meta-value">{rfq.location || 'N/A'}</span>
+        </div>
       </div>
 
       <div className="rfq-card__footer">
@@ -105,6 +109,10 @@ function DetailModal({ rfq, onClose, onSubmitQuote }) {
           <div className="detail-row">
             <span className="detail-row__label">Deadline</span>
             <span className="detail-row__value">{formatDeadline(rfq.deadline)}</span>
+          </div>
+          <div className="detail-row">
+            <span className="detail-row__label">Location</span>
+            <span className="detail-row__value">{rfq.location || 'N/A'}</span>
           </div>
           <div className="detail-row">
             <span className="detail-row__label">Status</span>

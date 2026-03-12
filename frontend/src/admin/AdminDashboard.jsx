@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './styles/AdminDashboard.css'
 
@@ -15,6 +16,7 @@ const TEMP_DASHBOARD_METRICS = {
 }
 
 function AdminDashboard() {
+  const navigate = useNavigate()
   const [metrics, setMetrics] = useState({
     rfqs: 0,
     suppliers: 0,
@@ -202,6 +204,13 @@ function AdminDashboard() {
       <div className="container py-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="admin-dashboard-heading mb-0">Admin Dashboard</h2>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => navigate('/admin/suppliers')}
+        >
+          Add Supplier
+        </button>
       </div>
 
       {errorMessage ? (
@@ -253,6 +262,16 @@ function AdminDashboard() {
           </div>
         </div>
       )}
+
+      <div className="d-flex justify-content-end gap-2 mb-4">
+        <button
+          type="button"
+          className="btn btn-outline-primary"
+          onClick={() => navigate('/admin/quotations')}
+        >
+          View Quotations
+        </button>
+      </div>
 
 
       <div className="mt-5">

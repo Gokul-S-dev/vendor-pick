@@ -28,7 +28,7 @@ const findLoginAccount = async (email) => {
     return {
       role: 'supplier',
       redirectTo: '/dashboard',
-      token: 'temp-supplier-token',
+      token: String(supplier._id),
       id: String(supplier._id),
       email: supplier.email,
       password: String(supplier.password || supplier.pass || '').trim(),
