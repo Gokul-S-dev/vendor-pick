@@ -200,4 +200,45 @@ router.get('/suppliers', async (req, res) => {
   }
 });
 
+// GET /api/admin/dashboard - Fetch real-time dashboard stats
+router.get('/dashboard', async (req, res) => {
+  try {
+    const rfqCollection = mongoose.connection.db.collection('RFQ');
+    const supplierCollection = mongoose.connection.db.collection('Supplier');
+    const quotationCollection = mongoose.connection.db.collection('Quotation');
+
+    // Count all RFQs with Pending or In Review status
+    const rfqs = await rfqCollection.countDocuments({
+      status: { $in: ['Pending', 'In Review'] }
+    });
+
+    // Count all active suppliers
+    const suppliers = await supplierCollection.countDocuments({
+      status: 'active'
+    });
+
+    // Count pending quotations (not yet reviewed)
+    const pendingQuotations = await quotationCollection.countDocuments({
+      status: 'Pending'
+    }).catch(() => 0);  // Return 0 if collection doesn't exist yet
+
+    // Count accepted quotations
+    const acceptedQuotations = await quotationCollection.countDocuments({
+      status: 'Accepted'
+    }).catch(() => 0);  // Return 0 if collection doesn't exist yet
+
+    return res.status(200).json({
+      rfqs,
+      suppliers,
+      pendingQuotations,
+      acceptedQuotations,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Failed to load dashboard stats.',
+      error: error.message,
+    });
+  }
+});
+
 export default router;

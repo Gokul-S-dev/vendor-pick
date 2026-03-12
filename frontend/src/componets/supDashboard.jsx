@@ -1,70 +1,8 @@
 ﻿import { useEffect, useState } from 'react'
+import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
-// import axios from 'axios'  // Uncomment when backend is ready
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './supDashboard.css'
-
-/* ─────────────────────────────────────────────
-   TEMPORARY DATA
-   Remove this block and uncomment the API call
-   in useEffect when the backend is ready.
-───────────────────────────────────────────── */
-const TEMP_RFQS = [
-  {
-    _id: '1',
-    rfqId: 'RFQ-101',
-    material: 'Cotton Fabric',
-    quantity: 5000,
-    unit: 'meters',
-    deadline: '2026-03-20',
-    status: 'Pending',
-  },
-  {
-    _id: '2',
-    rfqId: 'RFQ-102',
-    material: 'Stainless Steel Rods',
-    quantity: 1200,
-    unit: 'kg',
-    deadline: '2026-04-05',
-    status: 'In Review',
-  },
-  {
-    _id: '3',
-    rfqId: 'RFQ-103',
-    material: 'PVC Pipes',
-    quantity: 800,
-    unit: 'units',
-    deadline: '2026-04-12',
-    status: 'Approved',
-  },
-  {
-    _id: '4',
-    rfqId: 'RFQ-104',
-    material: 'Copper Wire',
-    quantity: 300,
-    unit: 'meters',
-    deadline: '2026-03-28',
-    status: 'Pending',
-  },
-  {
-    _id: '5',
-    rfqId: 'RFQ-105',
-    material: 'Industrial Bearings',
-    quantity: 450,
-    unit: 'units',
-    deadline: '2026-05-01',
-    status: 'In Review',
-  },
-  {
-    _id: '6',
-    rfqId: 'RFQ-106',
-    material: 'Polyester Resin',
-    quantity: 2000,
-    unit: 'liters',
-    deadline: '2026-04-22',
-    status: 'Approved',
-  },
-]
 
 /* ── Badge colour per status ── */
 const STATUS_CLASS = {
@@ -232,21 +170,48 @@ function Dashboard() {
   const [search,     setSearch]     = useState('')
 
   useEffect(() => {
-    /* ── TODO: replace with real API call ──────────────────────────────
-    const token = localStorage.getItem('supplierToken')
-    axios
-      .get('/api/rfq/supplier', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => setRfqs(res.data))
-      .catch(() => setError('Failed to load RFQs. Please try again.'))
-      .finally(() => setLoading(false))
-    ─────────────────────────────────────────────────────────────────── */
-    const timer = setTimeout(() => {
-      setRfqs(TEMP_RFQS)
-      setLoading(false)
-    }, 800)   // simulate network delay
-    return () => clearTimeout(timer)
+    const fetchRfqs = async () => {
+      try {
+        setLoading(true)
+        setError('')
+
+        // Get the supplier ID and token from localStorage
+        // For now, we'll use a stored supplier ID or fetch from auth context
+        const token = localStorage.getItem('supplierToken')
+        const supplierId = localStorage.getItem('supplierId')
+
+        if (!token) {
+          setError('Authentication required. Please log in again.')
+          setLoading(false)
+          return
+        }
+
+        if (!supplierId) {
+          // If supplierId is not in localStorage, we need to store it during login
+          console.warn('Supplier ID not found in localStorage')
+          setError('Supplier information not available.')
+          setLoading(false)
+          return
+        }
+
+        const response = await axios.get(`/api/rfq/supplier/${supplierId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+
+        setRfqs(response.data?.rfqs || [])
+      } catch (err) {
+        const errorMsg =
+          err.response?.data?.message ||
+          err.message ||
+          'Failed to load RFQs. Please try again.'
+        setError(errorMsg)
+        console.error('Error fetching RFQs:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchRfqs()
   }, [])
 
   const STATUSES = ['All', 'Pending', 'In Review', 'Approved']

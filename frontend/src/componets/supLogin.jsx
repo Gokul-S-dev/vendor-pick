@@ -88,12 +88,14 @@ function SupLogin() {
       const token = response?.data?.token
       const role = response?.data?.role
       const redirectTo = response?.data?.redirectTo
+      const userId = response?.data?.user?.id
 
       if (token) {
         if (role === 'admin') {
           localStorage.setItem('adminToken', token)
         } else {
           localStorage.setItem('supplierToken', token)
+          localStorage.setItem('supplierId', userId)
         }
       }
 
