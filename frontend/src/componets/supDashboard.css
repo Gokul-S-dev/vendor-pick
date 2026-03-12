@@ -305,6 +305,18 @@
   transform: translateX(2px);
 }
 
+.rfq-card__btn--outline {
+  background: transparent;
+  color: var(--dash-accent);
+  border: 1.5px solid var(--dash-accent);
+}
+.rfq-card__btn--outline:hover {
+  background: #eff6ff;
+  color: var(--dash-accent-dark);
+  border-color: var(--dash-accent-dark);
+  transform: none;
+}
+
 /* ── Days-left chips ── */
 .days-chip {
   font-size: .72rem;

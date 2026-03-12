@@ -1,4 +1,5 @@
 ﻿import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 // import axios from 'axios'  // Uncomment when backend is ready
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './supDashboard.css'
@@ -88,7 +89,9 @@ function DaysLeft({ dateStr }) {
 }
 
 /* ── RFQ Card ── */
-function RfqCard({ rfq, onView }) {
+function RfqCard({ rfq, onView, onSubmitQuote }) {
+  const canSubmitQuote = rfq.status === 'Pending'
+
   return (
     <div className="rfq-card">
       <div className="rfq-card__header">
@@ -115,21 +118,34 @@ function RfqCard({ rfq, onView }) {
 
       <div className="rfq-card__footer">
         <DaysLeft dateStr={rfq.deadline} />
-        <button
-          type="button"
-          className="btn rfq-card__btn"
-          onClick={() => onView(rfq)}
-        >
-          View Details
-        </button>
+        <div className="d-flex gap-2">
+          <button
+            type="button"
+            className="btn rfq-card__btn rfq-card__btn--outline"
+            onClick={() => onView(rfq)}
+          >
+            View Details
+          </button>
+          {canSubmitQuote ? (
+            <button
+              type="button"
+              className="btn rfq-card__btn"
+              onClick={() => onSubmitQuote(rfq)}
+            >
+              Submit Quote
+            </button>
+          ) : null}
+        </div>
       </div>
     </div>
   )
 }
 
 /* ── Detail Modal ── */
-function DetailModal({ rfq, onClose }) {
+function DetailModal({ rfq, onClose, onSubmitQuote }) {
   if (!rfq) return null
+  const canSubmitQuote = rfq.status === 'Pending'
+
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="detail-modal" onClick={(e) => e.stopPropagation()}>
@@ -163,10 +179,15 @@ function DetailModal({ rfq, onClose }) {
           <button type="button" className="btn detail-modal__dismiss" onClick={onClose}>
             Close
           </button>
-          {/* TODO: wire up Submit Quote action */}
-          <button type="button" className="btn detail-modal__action">
-            Submit Quote
-          </button>
+          {canSubmitQuote ? (
+            <button
+              type="button"
+              className="btn detail-modal__action"
+              onClick={() => onSubmitQuote(rfq)}
+            >
+              Submit Quote
+            </button>
+          ) : null}
         </div>
       </div>
     </div>
@@ -202,7 +223,8 @@ function StatBar({ rfqs }) {
    MAIN DASHBOARD COMPONENT
 ══════════════════════════════════════════ */
 function Dashboard() {
-  const [rfqs,       setRfqs]       = useState([])
+  const navigate = useNavigate()
+  const [rfqs,      setRfqs]      = useState([])
   const [loading,    setLoading]    = useState(true)
   const [error,      setError]      = useState('')
   const [selected,   setSelected]   = useState(null)
@@ -338,7 +360,11 @@ function Dashboard() {
           <div className="rfq-grid row g-4">
             {displayed.map((rfq) => (
               <div key={rfq._id} className="col-12 col-sm-6 col-xl-4">
-                <RfqCard rfq={rfq} onView={(r) => setSelected(r)} />
+                <RfqCard
+                  rfq={rfq}
+                  onView={(r) => setSelected(r)}
+                  onSubmitQuote={(r) => navigate('/submit-quotation/' + r.rfqId)}
+                />
               </div>
             ))}
           </div>
@@ -346,7 +372,11 @@ function Dashboard() {
       </main>
 
       {/* Detail modal */}
-      <DetailModal rfq={selected} onClose={() => setSelected(null)} />
+      <DetailModal
+        rfq={selected}
+        onClose={() => setSelected(null)}
+        onSubmitQuote={(r) => { setSelected(null); navigate('/submit-quotation/' + r.rfqId) }}
+      />
     </div>
   )
 }
