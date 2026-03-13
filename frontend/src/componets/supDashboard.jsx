@@ -11,6 +11,12 @@ const STATUS_CLASS = {
   Approved: 'badge-approved',
 }
 
+const URGENCY_CLASS = {
+  Normal: 'urgency-badge--normal',
+  High: 'urgency-badge--high',
+  Critical: 'urgency-badge--critical',
+}
+
 /* ── Friendly deadline formatting ── */
 function formatDeadline(dateStr) {
   const d = new Date(dateStr)
@@ -34,9 +40,14 @@ function RfqCard({ rfq, onView, onSubmitQuote }) {
     <div className="rfq-card">
       <div className="rfq-card__header">
         <span className="rfq-card__id">{rfq.rfqId}</span>
-        <span className={`rfq-card__badge ${STATUS_CLASS[rfq.status] || 'badge-pending'}`}>
-          {rfq.status}
-        </span>
+        <div className="d-flex align-items-center gap-2">
+          <span className={`urgency-badge ${URGENCY_CLASS[rfq.urgencyTag] || 'urgency-badge--normal'}`}>
+            {rfq.urgencyTag || 'Normal'}
+          </span>
+          <span className={`rfq-card__badge ${STATUS_CLASS[rfq.status] || 'badge-pending'}`}>
+            {rfq.status}
+          </span>
+        </div>
       </div>
 
       <h3 className="rfq-card__material">{rfq.material}</h3>
@@ -118,6 +129,12 @@ function DetailModal({ rfq, onClose, onSubmitQuote }) {
             <span className="detail-row__label">Status</span>
             <span className={`rfq-card__badge ${STATUS_CLASS[rfq.status] || 'badge-pending'}`}>
               {rfq.status}
+            </span>
+          </div>
+          <div className="detail-row">
+            <span className="detail-row__label">Urgency</span>
+            <span className={`urgency-badge ${URGENCY_CLASS[rfq.urgencyTag] || 'urgency-badge--normal'}`}>
+              {rfq.urgencyTag || 'Normal'}
             </span>
           </div>
         </div>

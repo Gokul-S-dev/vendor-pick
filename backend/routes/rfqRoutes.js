@@ -3,6 +3,13 @@ import mongoose from 'mongoose';
 
 const router = express.Router();
 
+function normalizeUrgencyTag(value) {
+  const normalized = String(value || 'Normal').trim().toLowerCase();
+  if (normalized === 'critical') return 'Critical';
+  if (normalized === 'high') return 'High';
+  return 'Normal';
+}
+
 // POST /api/admin/rfq - Admin creates RFQ and auto-matches suppliers
 router.post('/admin/create', async (req, res) => {
   try {
@@ -12,6 +19,7 @@ router.post('/admin/create', async (req, res) => {
     const quantity = Number(req.body?.quantity || 0);
     const deliveryTime = String(req.body?.deliveryTime || '').trim();
     const location = String(req.body?.location || '').trim();
+    const urgencyTag = normalizeUrgencyTag(req.body?.urgencyTag);
 
     if (!product || !price || !unit || !quantity || !deliveryTime || !location) {
       return res.status(400).json({
@@ -44,6 +52,7 @@ router.post('/admin/create', async (req, res) => {
       quantity,
       deliveryTime,
       location,
+      urgencyTag,
       status: 'Pending',
       matchedSuppliers: matchedSupplierIds,
       supplierDetails: suppliers.map((s) => ({
@@ -71,6 +80,7 @@ router.post('/admin/create', async (req, res) => {
         quantity: rfqDoc.quantity,
         deliveryTime: rfqDoc.deliveryTime,
         location: rfqDoc.location,
+        urgencyTag: rfqDoc.urgencyTag,
         matchedCount: matchedSupplierIds.length,
       },
     });
@@ -91,6 +101,7 @@ router.post('/send-to-supplier', async (req, res) => {
     const quantity = Number(req.body?.quantity || 1);
     const deliveryTime = String(req.body?.deliveryTime || '').trim();
     const location = String(req.body?.location || '').trim();
+    const urgencyTag = normalizeUrgencyTag(req.body?.urgencyTag);
     const supplierId = String(req.body?.supplierId || '').trim();
     const supplierName = String(req.body?.supplierName || '').trim();
 
@@ -126,6 +137,7 @@ router.post('/send-to-supplier', async (req, res) => {
       quantity,
       deliveryTime,
       location,
+      urgencyTag,
       status: 'Pending',
       sentBy: 'admin',
       sentToType: 'specific-supplier',
@@ -147,6 +159,7 @@ router.post('/send-to-supplier', async (req, res) => {
         quantity: rfqDoc.quantity,
         deliveryTime: rfqDoc.deliveryTime,
         location: rfqDoc.location,
+        urgencyTag: rfqDoc.urgencyTag,
         supplierName: rfqDoc.supplierName,
         status: rfqDoc.status,
       },
@@ -198,6 +211,7 @@ router.get('/supplier/:supplierId', async (req, res) => {
       deadline: rfq.deliveryTime,
       price: rfq.price,
       location: rfq.location,
+      urgencyTag: normalizeUrgencyTag(rfq.urgencyTag),
       status: rfq.status,
       createdAt: rfq.createdAt,
     }));
@@ -235,6 +249,7 @@ router.get('/history', async (_req, res) => {
       quantity: rfq.quantity,
       deliveryTime: rfq.deliveryTime,
       location: rfq.location,
+      urgencyTag: normalizeUrgencyTag(rfq.urgencyTag),
       status: rfq.status,
       createdAt: rfq.createdAt,
     }));
@@ -267,6 +282,7 @@ router.get('/all', async (req, res) => {
       quantity: rfq.quantity,
       deliveryTime: rfq.deliveryTime,
       location: rfq.location,
+      urgencyTag: normalizeUrgencyTag(rfq.urgencyTag),
       status: rfq.status,
       matchedCount: rfq.matchedSuppliers?.length || 0,
       createdAt: rfq.createdAt,

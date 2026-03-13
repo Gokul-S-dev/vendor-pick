@@ -28,6 +28,31 @@ function formatDate(value) {
   })
 }
 
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function normalizeUrgencyTag(value) {
+  const normalized = String(value || 'Normal').trim().toLowerCase()
+  if (normalized === 'critical') return 'Critical'
+  if (normalized === 'high') return 'High'
+  return 'Normal'
+}
+
+function resolveGroupUrgency(items) {
+  if (!Array.isArray(items) || items.length === 0) return 'Normal'
+  const priority = { Normal: 1, High: 2, Critical: 3 }
+  return items.reduce((current, item) => {
+    const next = normalizeUrgencyTag(item?.urgencyTag)
+    return priority[next] > priority[current] ? next : current
+  }, 'Normal')
+}
+
 function AdminQuotations() {
   const [quotations, setQuotations] = useState([])
   const [loading, setLoading] = useState(true)
@@ -158,14 +183,18 @@ function AdminQuotations() {
     const toastId = `compare-${groupKey}`
     toast.loading('Running AI comparison...', { id: toastId })
 
+    const urgencyTag = resolveGroupUrgency(selectedGroupItems)
+
     try {
       const payload = {
+        urgencyTag,
         quotes: selectedGroupItems.map((quotation) => ({
           quotationId: quotation.quotationId,
           supplierName: quotation.supplierName,
           price: Number(quotation.pricePerUnit || 0),
           shipping: Number(quotation.shippingCost || 0),
           deliveryDate: Number(quotation.deliveryLeadTime || 0),
+          urgencyTag: normalizeUrgencyTag(quotation.urgencyTag),
         })),
       }
 
@@ -178,6 +207,7 @@ function AdminQuotations() {
             shipping: Number(item.shipping || 0),
             deliveryDate: Number(item.deliveryDate || 0),
             supplierScore: Number(item.supplier_score || item.supplierScore || 0),
+            urgencyTag: normalizeUrgencyTag(item.urgencyTag || urgencyTag),
             recommended: Boolean(item.recommended),
           }))
         : []
@@ -215,37 +245,105 @@ function AdminQuotations() {
 
     const gridApi = createGrid(element, {
       columnDefs: [
-        { field: 'supplierName', headerName: 'Supplier', minWidth: 150 },
-        { field: 'quotationId', headerName: 'Quotation ID', minWidth: 130 },
+        {
+          headerName: 'Rank',
+          maxWidth: 92,
+          sortable: false,
+          filter: false,
+          resizable: false,
+          pinned: 'left',
+          cellClass: 'compare-cell--center',
+          cellRenderer: (params) => {
+            const rank = (params.node?.rowIndex ?? 0) + 1
+            const toneClass = rank === 1 ? 'compare-rank-pill--top' : 'compare-rank-pill'
+            return `<span class="${toneClass}">#${rank}</span>`
+          },
+        },
+        {
+          field: 'supplierName',
+          headerName: 'Supplier',
+          minWidth: 220,
+          cellRenderer: (params) => {
+            const supplierName = escapeHtml(params.data?.supplierName || 'Supplier')
+            const quotationId = escapeHtml(params.data?.quotationId || '')
+            const supplierInitial = escapeHtml((params.data?.supplierName || 'S').charAt(0).toUpperCase())
+            return `
+              <div class="compare-supplier-cell">
+                <span class="compare-supplier-cell__avatar">${supplierInitial}</span>
+                <div class="compare-supplier-cell__body">
+                  <div class="compare-supplier-cell__name">${supplierName}</div>
+                  <div class="compare-supplier-cell__sub">${quotationId}</div>
+                </div>
+              </div>
+            `
+          },
+        },
         {
           field: 'price',
           headerName: 'Price',
-          minWidth: 110,
-          valueFormatter: (params) => formatCurrency(params.value),
+          minWidth: 135,
+          cellRenderer: (params) => `
+            <div class="compare-metric-cell">
+              <span class="compare-metric-cell__value">${formatCurrency(params.value)}</span>
+              <span class="compare-metric-cell__label">per unit</span>
+            </div>
+          `,
         },
         {
           field: 'shipping',
           headerName: 'Shipping',
-          minWidth: 120,
-          valueFormatter: (params) => formatCurrency(params.value),
+          minWidth: 135,
+          cellRenderer: (params) => `
+            <div class="compare-metric-cell">
+              <span class="compare-metric-cell__value">${formatCurrency(params.value)}</span>
+              <span class="compare-metric-cell__label">delivery cost</span>
+            </div>
+          `,
         },
         {
           field: 'deliveryDate',
           headerName: 'Delivery (Days)',
-          minWidth: 140,
+          minWidth: 150,
+          cellRenderer: (params) => {
+            const days = Number(params.value || 0)
+            const toneClass = days <= 3 ? 'compare-chip compare-chip--good' : days <= 7 ? 'compare-chip compare-chip--neutral' : 'compare-chip compare-chip--slow'
+            return `<span class="${toneClass}">${days} day${days === 1 ? '' : 's'}</span>`
+          },
         },
         {
           field: 'supplierScore',
           headerName: 'AI Score',
-          minWidth: 110,
+          minWidth: 180,
           sort: 'desc',
-          valueFormatter: (params) => Number(params.value || 0).toFixed(4),
+          comparator: (valueA, valueB) => Number(valueA || 0) - Number(valueB || 0),
+          cellRenderer: (params) => {
+            const score = Number(params.value || 0)
+            const scoreText = score.toFixed(4)
+            const width = Math.max(6, Math.min(100, score * 100))
+            return `
+              <div class="compare-score-cell">
+                <div class="compare-score-cell__meta">
+                  <span class="compare-score-cell__value">${scoreText}</span>
+                  <span class="compare-score-cell__hint">confidence</span>
+                </div>
+                <div class="compare-score-cell__bar">
+                  <span class="compare-score-cell__fill" style="width:${width}%"></span>
+                </div>
+              </div>
+            `
+          },
         },
         {
           field: 'recommended',
           headerName: 'Recommended',
-          minWidth: 130,
-          valueFormatter: (params) => (params.value ? 'Yes' : 'No'),
+          minWidth: 145,
+          cellClass: 'compare-cell--center',
+          cellRenderer: (params) => {
+            if (params.value) {
+              return '<span class="compare-recommend-badge compare-recommend-badge--yes">Top pick</span>'
+            }
+            return '<span class="compare-recommend-badge">Review</span>'
+          },
         },
       ],
       rowData,
@@ -257,6 +355,12 @@ function AdminQuotations() {
       },
       animateRows: true,
       domLayout: 'autoHeight',
+      rowHeight: 84,
+      headerHeight: 52,
+      suppressCellFocus: true,
+      onFirstDataRendered: (params) => {
+        params.api.sizeColumnsToFit()
+      },
       rowClassRules: {
         'compare-best-row': (params) => Boolean(params.data?.recommended),
       },
@@ -345,6 +449,10 @@ function AdminQuotations() {
               const selectedGroupItems = group.items.filter((item) => selectedQuotationIds.includes(item.id))
               const compareEnabled = selectedGroupItems.length >= 2
               const isCompareOpen = activeCompareGroupKey === groupKey && compareEnabled
+              const groupUrgencyTag = resolveGroupUrgency(group.items)
+              const selectedUrgencyTag = selectedGroupItems.length > 0
+                ? resolveGroupUrgency(selectedGroupItems)
+                : groupUrgencyTag
 
               return (
               <SwiperSlide key={groupKey}>
@@ -357,6 +465,11 @@ function AdminQuotations() {
                       </p>
                       <h2 className="quotation-group-title mb-1">{group.product}</h2>
                       <p className="text-secondary mb-0">{group.items.length} supplier quote(s)</p>
+                      <p className="small mb-0 mt-1">
+                        <span className={`compare-urgency compare-urgency--${groupUrgencyTag.toLowerCase()}`}>
+                          Urgency: {groupUrgencyTag}
+                        </span>
+                      </p>
                     </div>
                     <div className="d-flex flex-wrap gap-3 align-items-center">
                       <button
@@ -394,6 +507,7 @@ function AdminQuotations() {
                           <th>Price / Unit</th>
                           <th>Shipping</th>
                           <th>Lead Time</th>
+                          <th>Urgency</th>
                           <th>Tax</th>
                           <th>Status</th>
                           <th>Submitted</th>
@@ -419,6 +533,11 @@ function AdminQuotations() {
                             <td>{formatCurrency(quotation.pricePerUnit)}</td>
                             <td>{formatCurrency(quotation.shippingCost)}</td>
                             <td>{quotation.deliveryLeadTime} days</td>
+                            <td>
+                              <span className={`compare-urgency compare-urgency--${normalizeUrgencyTag(quotation.urgencyTag).toLowerCase()}`}>
+                                {normalizeUrgencyTag(quotation.urgencyTag)}
+                              </span>
+                            </td>
                             <td>{quotation.tax}%</td>
                             <td>
                               <span className={`badge ${getStatusClass(quotation.status)}`}>
@@ -448,7 +567,16 @@ function AdminQuotations() {
 
                   {isCompareOpen ? (
                     <div className="compare-panel mt-4">
-                      <h3 className="compare-panel__title">AI Comparison (Price + Shipping + Delivery)</h3>
+                      <div className="compare-panel__header">
+                        <div>
+                          <h3 className="compare-panel__title mb-1">AI Comparison</h3>
+
+                        </div>
+                        <div className="compare-panel__legend">
+                          <span className="compare-recommend-badge compare-recommend-badge--yes">Top pick</span>
+                          <span className="compare-chip compare-chip--neutral">Sorted by AI score</span>
+                        </div>
+                      </div>
                       {compareLoadingByGroup[groupKey] ? (
                         <div className="alert alert-info mb-0" role="alert">Comparing selected quotations...</div>
                       ) : null}

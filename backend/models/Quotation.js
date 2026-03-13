@@ -18,6 +18,11 @@ const quotationSchema = new mongoose.Schema(
 			required: true,
 			trim: true,
 		},
+		urgencyTag: {
+			type: String,
+			enum: ['Normal', 'High', 'Critical'],
+			default: 'Normal',
+		},
 		supplierId: {
 			type: String,
 			required: true,

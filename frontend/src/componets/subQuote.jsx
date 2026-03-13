@@ -246,7 +246,7 @@ function SubmitQuotation() {
                 >
                   {loading
                     ? <><span className="spinner-border spinner-border-sm me-2" />Submitting…</>
-                    : '🚀  Submit Quotation'
+                    : ' Submit Quotation'
                   }
                 </button>
               </div>

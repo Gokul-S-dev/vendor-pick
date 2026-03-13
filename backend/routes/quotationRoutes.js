@@ -3,6 +3,13 @@ import mongoose from 'mongoose'
 
 const router = express.Router()
 
+function normalizeUrgencyTag(value) {
+	const normalized = String(value || 'Normal').trim().toLowerCase()
+	if (normalized === 'critical') return 'Critical'
+	if (normalized === 'high') return 'High'
+	return 'Normal'
+}
+
 router.post('/submit', async (req, res) => {
 	try {
 		const rfqId = String(req.body?.rfqId || '').trim()
@@ -49,6 +56,7 @@ router.post('/submit', async (req, res) => {
 			quotationId: `QT-${Date.now().toString().slice(-6)}`,
 			rfqId,
 			product: String(rfq.product || '').trim(),
+			urgencyTag: normalizeUrgencyTag(rfq.urgencyTag),
 			supplierId,
 			supplierName: String(supplier.supplierName || supplier.name || '').trim(),
 			pricePerUnit,
@@ -108,6 +116,7 @@ router.get('/supplier/:supplierId', async (req, res) => {
 			quotationId: quotation.quotationId,
 			rfqId: quotation.rfqId,
 			material: quotation.product,
+			urgencyTag: normalizeUrgencyTag(quotation.urgencyTag),
 			pricePerUnit: quotation.pricePerUnit,
 			shippingCost: quotation.shippingCost,
 			deliveryLeadTime: quotation.deliveryLeadTime,
@@ -140,6 +149,7 @@ router.get('/admin', async (_req, res) => {
 			quotationId: quotation.quotationId,
 			rfqId: quotation.rfqId,
 			product: quotation.product,
+			urgencyTag: normalizeUrgencyTag(quotation.urgencyTag),
 			supplierId: quotation.supplierId,
 			supplierName: quotation.supplierName,
 			pricePerUnit: quotation.pricePerUnit,

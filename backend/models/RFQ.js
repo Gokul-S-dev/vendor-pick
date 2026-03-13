@@ -38,6 +38,11 @@ const rfqSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  urgencyTag: {
+    type: String,
+    enum: ['Normal', 'High', 'Critical'],
+    default: 'Normal',
+  },
   status: {
     type: String,
     enum: ['Pending', 'In Review', 'Approved', 'Rejected'],

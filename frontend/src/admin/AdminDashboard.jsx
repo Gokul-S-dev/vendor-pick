@@ -37,6 +37,7 @@ function AdminDashboard() {
     unit: '',
     deliveryTime: '',
     location: '',
+    urgencyTag: 'Normal',
   })
   const [rfqLoading, setRfqLoading] = useState(false)
   const [rfqError, setRfqError] = useState('')
@@ -71,6 +72,7 @@ function AdminDashboard() {
       unit: '',
       deliveryTime: '',
       location: '',
+      urgencyTag: 'Normal',
     })
   }
 
@@ -83,6 +85,7 @@ function AdminDashboard() {
       unit: '',
       deliveryTime: '',
       location: '',
+      urgencyTag: 'Normal',
     })
     setRfqError('')
   }
@@ -133,6 +136,7 @@ function AdminDashboard() {
           quantity: 1,
           deliveryTime: rfqForm.deliveryTime,
           location: rfqForm.location,
+          urgencyTag: rfqForm.urgencyTag,
           supplierId: selectedSupplier.id,
           supplierName: selectedSupplier.supplierName,
         },
@@ -430,6 +434,7 @@ function AdminDashboard() {
                   <tr>
                     <th>RFQ ID</th>
                     <th>Product</th>
+                    <th>Urgency</th>
                     <th>Supplier</th>
                     <th>Price</th>
                     <th>Location</th>
@@ -442,6 +447,11 @@ function AdminDashboard() {
                     <tr key={item.id}>
                       <td><span className="adm-table__rfq-id">{item.rfqId}</span></td>
                       <td>{item.product}</td>
+                      <td>
+                        <span className={`adm-badge ${String(item.urgencyTag || 'Normal') === 'Critical' ? 'adm-badge--critical' : String(item.urgencyTag || 'Normal') === 'High' ? 'adm-badge--high' : 'adm-badge--normal'}`}>
+                          {item.urgencyTag || 'Normal'}
+                        </span>
+                      </td>
                       <td>{item.supplierName}</td>
                       <td>₹{Number(item.price || 0).toLocaleString('en-IN')}</td>
                       <td>{item.location}</td>
@@ -551,6 +561,28 @@ function AdminDashboard() {
                       disabled={rfqLoading}
                       required
                     />
+                  </div>
+
+                  <div className="mb-3">
+                    <label htmlFor="urgencyTag" className="form-label">
+                      Urgency Tag <span className="text-danger">*</span>
+                    </label>
+                    <select
+                      className="form-select"
+                      id="urgencyTag"
+                      name="urgencyTag"
+                      value={rfqForm.urgencyTag}
+                      onChange={handleRfqFormChange}
+                      disabled={rfqLoading}
+                      required
+                    >
+                      <option value="Normal">Normal</option>
+                      <option value="High">High</option>
+                      <option value="Critical">Critical</option>
+                    </select>
+                    <small className="text-muted">
+                      Critical RFQs prioritize faster delivery in AI comparison.
+                    </small>
                   </div>
 
                   <div className="mb-3">

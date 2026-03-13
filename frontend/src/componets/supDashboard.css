@@ -273,6 +273,20 @@
 .badge-review   { background: var(--dash-review);  }
 .badge-approved { background: var(--dash-approved);}
 
+.urgency-badge {
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: .25rem .75rem;
+  color: #fff;
+}
+
+.urgency-badge--normal { background: #2563eb; }
+.urgency-badge--high { background: #d97706; }
+.urgency-badge--critical { background: #dc2626; }
+
 .rfq-card__material {
   font-size: 1.05rem;
   font-weight: 700;
