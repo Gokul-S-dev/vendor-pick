@@ -7,6 +7,7 @@ import adminAuthRoutes from './routes/adminAuthRoutes.js';
 import rfqRoutes from './routes/rfqRoutes.js';
 import quotationRoutes from './routes/quotationRoutes.js';
 import supplierRoutes from './routes/supplierRoutes.js';
+import notificationsRoutes from './routes/notificationsRoutes.js';
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.use('/api/admin', adminAuthRoutes);
 app.use('/api/rfq', rfqRoutes);
 app.use('/api/quotation', quotationRoutes);
 app.use('/api/supplier', supplierRoutes);
+app.use('/api/notifications', notificationsRoutes);
 
 const PORT = 3000;
 

@@ -6,7 +6,13 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 const STATUS_CLASS = {
   Pending: 'bg-warning text-dark',
   Accepted: 'bg-success',
+  Approved: 'bg-success',
   Rejected: 'bg-danger',
+}
+
+function getStatusLabel(status) {
+  if (status === 'Accepted') return 'Approved'
+  return status || 'Pending'
 }
 
 function formatCurrency(value) {
@@ -90,7 +96,7 @@ function ViewQuotations() {
                         <td>{q.deliveryLeadTime} days</td>
                         <td>
                           <span className={`badge ${STATUS_CLASS[q.status] || 'bg-secondary'}`}>
-                            {q.status || 'Pending'}
+                            {getStatusLabel(q.status)}
                           </span>
                         </td>
                       </tr>

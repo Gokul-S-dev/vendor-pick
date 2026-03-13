@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import { FaRegStar, FaStar } from 'react-icons/fa'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './styles/AdminDashboard.css'
@@ -24,6 +25,8 @@ function AdminDashboard() {
     acceptedQuotations: 0,
   })
   const [suppliersList, setSuppliersList] = useState([])
+  const [rfqHistory, setRfqHistory] = useState([])
+  const [historyLoading, setHistoryLoading] = useState(false)
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
   const [showRfqModal, setShowRfqModal] = useState(false)
@@ -37,11 +40,26 @@ function AdminDashboard() {
   })
   const [rfqLoading, setRfqLoading] = useState(false)
   const [rfqError, setRfqError] = useState('')
+  const [ratingSavingId, setRatingSavingId] = useState('')
 
   const authHeaders = useMemo(() => {
     const token = localStorage.getItem('adminToken')
     return token ? { Authorization: 'Bearer ' + token } : {}
   }, [])
+
+  const fetchRfqHistory = useCallback(async () => {
+    try {
+      setHistoryLoading(true)
+      const response = await axios.get('/api/rfq/history', {
+        headers: authHeaders,
+      })
+      setRfqHistory(response.data?.history || [])
+    } catch (error) {
+      console.error('RFQ History Fetch Error:', error)
+    } finally {
+      setHistoryLoading(false)
+    }
+  }, [authHeaders])
 
   const handleOpenRfqModal = (supplier) => {
     setSelectedSupplier(supplier)
@@ -123,11 +141,33 @@ function AdminDashboard() {
 
       alert(`RFQ ${response.data.rfq.rfqId} sent to ${selectedSupplier.supplierName} successfully!`)
       handleCloseRfqModal()
+      fetchRfqHistory()
     } catch (error) {
       setRfqError(error.response?.data?.message || 'Failed to send RFQ. Please try again.')
       console.error('Error sending RFQ:', error)
     } finally {
       setRfqLoading(false)
+    }
+  }
+
+  const handleRateSupplier = async (supplierId, ratingValue) => {
+    try {
+      setRatingSavingId(supplierId)
+
+      await axios.patch(
+        `/api/admin/suppliers/${supplierId}/rating`,
+        { rating: ratingValue },
+        { headers: authHeaders }
+      )
+
+      setSuppliersList((previous) => previous.map((supplier) => (
+        supplier.id === supplierId ? { ...supplier, rating: ratingValue } : supplier
+      )))
+    } catch (error) {
+      console.error('Supplier rating update failed:', error)
+      alert(error.response?.data?.message || 'Failed to update supplier rating.')
+    } finally {
+      setRatingSavingId('')
     }
   }
 
@@ -197,157 +237,231 @@ function AdminDashboard() {
 
     fetchDashboardData()
     fetchAllSuppliers()
-  }, [authHeaders])
+    fetchRfqHistory()
+  }, [authHeaders, fetchRfqHistory])
 
   return (
-    <div className="admin-dashboard-page">
-      <div className="container py-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="admin-dashboard-heading mb-0">Admin Dashboard</h2>
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={() => navigate('/admin/suppliers')}
-        >
-          Add Supplier
-        </button>
-      </div>
+    <div className="adm-root">
 
-      {errorMessage ? (
-        <div className="alert alert-danger" role="alert">
-          {errorMessage}
+      {/* ── Top Nav ── */}
+      <nav className="adm-nav">
+        <div className="adm-nav__brand">
+          <div className="adm-nav__logo" />
+          <span className="adm-nav__name">Vendor Pulse</span>
         </div>
-      ) : null}
-
-      {loading ? (
-        <div className="alert alert-info" role="alert">
-          Loading dashboard...
+        <div className="adm-nav__actions">
+          <button
+            type="button"
+            className="adm-nav__action-btn"
+            onClick={() => navigate('/admin/quotations')}
+          >
+            View Quotations
+          </button>
+          <button
+            type="button"
+            className="adm-nav__action-btn adm-nav__action-btn--primary"
+            onClick={() => navigate('/admin/suppliers')}
+          >
+            Add Supplier
+          </button>
+          <div className="adm-nav__avatar">A</div>
+          <button
+            type="button"
+            className="adm-nav__logout"
+            onClick={() => {
+              localStorage.removeItem('adminToken')
+              navigate('/admin/login')
+            }}
+          >
+            Logout
+          </button>
         </div>
-      ) : (
-        <div className="row g-3 mb-4">
-          <div className="col-md-3">
-            <div className="card admin-metric-card h-100">
-              <div className="card-body">
-                <h6 className="admin-metric-title text-muted">Active RFQs</h6>
-                <h3 className="admin-metric-value">{metrics.rfqs}</h3>
-              </div>
-            </div>
-          </div>
+      </nav>
 
-          <div className="col-md-3">
-            <div className="card admin-metric-card h-100">
-              <div className="card-body">
-                <h6 className="admin-metric-title text-muted">Registered Suppliers</h6>
-                <h3 className="admin-metric-value">{metrics.suppliers}</h3>
-              </div>
-            </div>
-          </div>
+      {/* ── Main Canvas ── */}
+      <main className="adm-main">
 
-          <div className="col-md-3">
-            <div className="card admin-metric-card h-100">
-              <div className="card-body">
-                <h6 className="admin-metric-title text-muted">Pending Quotations</h6>
-                <h3 className="admin-metric-value">{metrics.pendingQuotations}</h3>
-              </div>
-            </div>
-          </div>
-
-          <div className="col-md-3">
-            <div className="card admin-metric-card h-100">
-              <div className="card-body">
-                <h6 className="admin-metric-title text-muted">Accepted Quotations</h6>
-                <h3 className="admin-metric-value">{metrics.acceptedQuotations}</h3>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="d-flex justify-content-end gap-2 mb-4">
-        <button
-          type="button"
-          className="btn btn-outline-primary"
-          onClick={() => navigate('/admin/quotations')}
-        >
-          View Quotations
-        </button>
-      </div>
-
-
-      <div className="mt-5">
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <h4 className="mb-0">All Suppliers ({suppliersList.length})</h4>
+        {/* Heading */}
+        <div className="adm-heading mb-4">
+          <h2 className="adm-heading__title">Admin Dashboard</h2>
+          <p className="adm-heading__sub">Manage your suppliers and RFQ workflow</p>
         </div>
 
-        {suppliersList.length === 0 ? (
-          <div className="alert alert-info" role="alert">
-            No suppliers registered yet.
+        {errorMessage && (
+          <div className="alert alert-danger mb-4" role="alert">{errorMessage}</div>
+        )}
+
+        {/* ── Stat Cards ── */}
+        <div className="row g-3 mb-5">
+          <div className="col-6 col-md-3">
+            <div className="adm-stat adm-stat--total">
+              <div className="adm-stat__value">{loading ? '–' : metrics.rfqs}</div>
+              <div className="adm-stat__label">Total RFQs</div>
+            </div>
           </div>
-        ) : (
-          <div className="row g-4">
-            {suppliersList.map((supplier) => (
-              <div key={supplier.id} className="col-md-6 col-lg-4">
-                <div className="card supplier-card h-100 border-0" style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
-                  <div className="card-body d-flex flex-column">
-                    <div className="d-flex justify-content-between align-items-start mb-3">
-                      <div>
-                        <h6 className="text-primary fw-bold mb-1">ID: {supplier.id.slice(-6)}</h6>
-                        <h5 className="mb-0" style={{ fontSize: '1.1rem' }}>
-                          {supplier.supplierName}
-                        </h5>
+          <div className="col-6 col-md-3">
+            <div className="adm-stat adm-stat--pending">
+              <div className="adm-stat__value">{loading ? '–' : metrics.pendingQuotations}</div>
+              <div className="adm-stat__label">Pending Quotations</div>
+            </div>
+          </div>
+          <div className="col-6 col-md-3">
+            <div className="adm-stat adm-stat--review">
+              <div className="adm-stat__value">{loading ? '–' : metrics.suppliers}</div>
+              <div className="adm-stat__label">Registered Suppliers</div>
+            </div>
+          </div>
+          <div className="col-6 col-md-3">
+            <div className="adm-stat adm-stat--approved">
+              <div className="adm-stat__value">{loading ? '–' : metrics.acceptedQuotations}</div>
+              <div className="adm-stat__label">Accepted Quotations</div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Suppliers Section ── */}
+        <div className="adm-section mb-5">
+          <div className="adm-section__header mb-3">
+            <h4 className="adm-section__title">All Suppliers ({suppliersList.length})</h4>
+          </div>
+
+          {suppliersList.length === 0 ? (
+            <div className="adm-empty">No suppliers registered yet.</div>
+          ) : (
+            <div className="row g-4">
+              {suppliersList.map((supplier) => (
+                <div key={supplier.id} className="col-md-6 col-lg-4">
+                  <div className="adm-supplier-card">
+
+                    {/* Card Header */}
+                    <div className="adm-supplier-card__header">
+                      <div className="adm-supplier-card__avatar">
+                        {(supplier.supplierName || 'S').charAt(0).toUpperCase()}
                       </div>
-                      <span className={`badge ${supplier.status === 'active' ? 'bg-success' : 'bg-secondary'}`}>
+                      <div className="adm-supplier-card__info">
+                        <div className="adm-supplier-card__name">{supplier.supplierName}</div>
+                        <div className="adm-supplier-card__company">{supplier.companyName}</div>
+                      </div>
+                      <span className={`adm-badge ${supplier.status === 'active' ? 'adm-badge--active' : 'adm-badge--inactive'}`}>
                         {supplier.status.toUpperCase()}
                       </span>
                     </div>
 
-                    <div className="mb-3">
-                      <p className="text-muted small mb-2">
-                        <strong>Company:</strong> {supplier.companyName}
-                      </p>
-                      <p className="text-muted small mb-2">
-                        <strong>Products:</strong> {supplier.products || 'Not specified'}
-                      </p>
+                    {/* Card Meta */}
+                    <div className="adm-supplier-card__meta">
+                      <div className="adm-supplier-card__meta-row">
+                        <span className="adm-supplier-card__meta-label">Products</span>
+                        <span className="adm-supplier-card__meta-value">{supplier.products || '—'}</span>
+                      </div>
+                      <div className="adm-supplier-card__meta-row">
+                        <span className="adm-supplier-card__meta-label">Email</span>
+                        <span className="adm-supplier-card__meta-value" style={{ wordBreak: 'break-word' }}>{supplier.email}</span>
+                      </div>
+                      <div className="adm-supplier-card__meta-row">
+                        <span className="adm-supplier-card__meta-label">Phone</span>
+                        <span className="adm-supplier-card__meta-value">{supplier.phone}</span>
+                      </div>
                     </div>
 
-                    <div className="border-top pt-3 mt-auto">
-                      <div className="row g-2 mb-3">
-                        <div className="col-6">
-                          <small className="text-muted d-block">EMAIL</small>
-                          <small className="fw-bold" style={{ wordBreak: 'break-word' }}>
-                            {supplier.email}
-                          </small>
-                        </div>
-                        <div className="col-6">
-                          <small className="text-muted d-block">PHONE</small>
-                          <small className="fw-bold">{supplier.phone}</small>
-                        </div>
+                    {/* Star Rating */}
+                    <div className="adm-supplier-card__rating">
+                      <span className="adm-supplier-card__meta-label">Rating</span>
+                      <div className="d-flex align-items-center gap-1 mt-1">
+                        {[1, 2, 3, 4, 5].map((starValue) => (
+                          <button
+                            key={starValue}
+                            type="button"
+                            className="btn p-0 border-0 bg-transparent"
+                            disabled={ratingSavingId === supplier.id}
+                            onClick={() => handleRateSupplier(supplier.id, starValue)}
+                            aria-label={`Rate ${supplier.supplierName} ${starValue} stars`}
+                          >
+                            {Number(supplier.rating || 0) >= starValue ? (
+                              <FaStar color="#f59e0b" size={16} />
+                            ) : (
+                              <FaRegStar color="#94a3b8" size={16} />
+                            )}
+                          </button>
+                        ))}
+                        <span className="adm-supplier-card__rating-val">
+                          {Number(supplier.rating || 0).toFixed(1)}
+                        </span>
                       </div>
+                    </div>
 
-                      <div className="d-grid gap-2">
-                        <button
-                          type="button"
-                          className="btn btn-outline-primary btn-sm"
-                          onClick={() => console.log('View supplier details:', supplier.id)}
-                        >
-                          View Details
-                        </button>
-                        <button
-                          type="button"
-                          className="btn btn-success btn-sm"
-                          onClick={() => handleOpenRfqModal(supplier)}
-                        >
-                          Send RFQ
-                        </button>
-                      </div>
+                    {/* Card Actions */}
+                    <div className="adm-supplier-card__actions">
+                      <button
+                        type="button"
+                        className="adm-btn adm-btn--outline"
+                        onClick={() => console.log('View supplier details:', supplier.id)}
+                      >
+                        View Details
+                      </button>
+                      <button
+                        type="button"
+                        className="adm-btn adm-btn--primary"
+                        onClick={() => handleOpenRfqModal(supplier)}
+                      >
+                        Send RFQ
+                      </button>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* ── RFQ History Section ── */}
+        <div className="adm-section mb-5">
+          <div className="adm-section__header mb-3">
+            <h4 className="adm-section__title">RFQ Send History ({rfqHistory.length})</h4>
           </div>
-        )}
-      </div>
+
+          {historyLoading ? (
+            <div className="adm-empty">Loading RFQ history...</div>
+          ) : rfqHistory.length === 0 ? (
+            <div className="adm-empty">No RFQ history yet.</div>
+          ) : (
+            <div className="table-responsive adm-table-wrap">
+              <table className="adm-table">
+                <thead>
+                  <tr>
+                    <th>RFQ ID</th>
+                    <th>Product</th>
+                    <th>Supplier</th>
+                    <th>Price</th>
+                    <th>Location</th>
+                    <th>Status</th>
+                    <th>Sent At</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rfqHistory.map((item) => (
+                    <tr key={item.id}>
+                      <td><span className="adm-table__rfq-id">{item.rfqId}</span></td>
+                      <td>{item.product}</td>
+                      <td>{item.supplierName}</td>
+                      <td>₹{Number(item.price || 0).toLocaleString('en-IN')}</td>
+                      <td>{item.location}</td>
+                      <td>
+                        <span className={`adm-badge ${item.status === 'Approved' ? 'adm-badge--approved' : item.status === 'In Review' ? 'adm-badge--review' : 'adm-badge--pending'}`}>
+                          {item.status}
+                        </span>
+                      </td>
+                      <td className="adm-table__date">
+                        {item.createdAt ? new Date(item.createdAt).toLocaleString('en-IN') : '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+      </main>
 
       {/* RFQ Modal */}
       {showRfqModal && (
@@ -479,7 +593,6 @@ function AdminDashboard() {
           </div>
         </div>
       )}
-      </div>
     </div>
   )
 }

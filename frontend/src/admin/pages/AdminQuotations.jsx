@@ -32,6 +32,7 @@ function AdminQuotations() {
   const [quotations, setQuotations] = useState([])
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
+  const [approvingQuotationId, setApprovingQuotationId] = useState('')
   const [selectedQuotationIds, setSelectedQuotationIds] = useState([])
   const [activeCompareGroupKey, setActiveCompareGroupKey] = useState('')
   const [compareRowsByGroup, setCompareRowsByGroup] = useState({})
@@ -93,6 +94,35 @@ function AdminQuotations() {
       return accumulator
     }, {})
   )
+
+  const getStatusClass = (status) => {
+    if (status === 'Accepted' || status === 'Approved') return 'bg-success'
+    if (status === 'Rejected') return 'bg-danger'
+    return 'bg-warning text-dark'
+  }
+
+  const getStatusLabel = (status) => {
+    if (status === 'Accepted') return 'Approved'
+    return status || 'Pending'
+  }
+
+  const handleApproveQuotation = async (quotation) => {
+    try {
+      setApprovingQuotationId(quotation.id)
+      await axios.patch(`/api/quotation/${quotation.id}/approve`, {}, {
+        headers: authHeaders,
+      })
+
+      setQuotations((previous) => previous.map((item) => (
+        item.id === quotation.id ? { ...item, status: 'Accepted' } : item
+      )))
+      toast.success('Quotation approved successfully.')
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to approve quotation.')
+    } finally {
+      setApprovingQuotationId('')
+    }
+  }
 
   const toggleSingleSelection = (quotationId) => {
     setSelectedQuotationIds((previous) => (
@@ -367,6 +397,7 @@ function AdminQuotations() {
                           <th>Tax</th>
                           <th>Status</th>
                           <th>Submitted</th>
+                          <th>Action</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -390,11 +421,25 @@ function AdminQuotations() {
                             <td>{quotation.deliveryLeadTime} days</td>
                             <td>{quotation.tax}%</td>
                             <td>
-                              <span className={`badge ${quotation.status === 'Accepted' ? 'bg-success' : quotation.status === 'Rejected' ? 'bg-danger' : 'bg-warning text-dark'}`}>
-                                {quotation.status}
+                              <span className={`badge ${getStatusClass(quotation.status)}`}>
+                                {getStatusLabel(quotation.status)}
                               </span>
                             </td>
                             <td>{formatDate(quotation.createdAt)}</td>
+                            <td>
+                              {quotation.status === 'Accepted' || quotation.status === 'Approved' ? (
+                                <span className="badge bg-success">Approved</span>
+                              ) : (
+                                <button
+                                  type="button"
+                                  className="btn btn-sm btn-success"
+                                  disabled={approvingQuotationId === quotation.id}
+                                  onClick={() => handleApproveQuotation(quotation)}
+                                >
+                                  {approvingQuotationId === quotation.id ? 'Approving...' : 'Approve'}
+                                </button>
+                              )}
+                            </td>
                           </tr>
                         ))}
                       </tbody>

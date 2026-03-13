@@ -142,7 +142,6 @@ function SupLogin() {
                 <FaShieldAlt />
               </div>
               <h1 className="sup-login__brand-name">Vendor Pulse</h1>
-              <p className="sup-login__brand-tagline">Supplier Portal</p>
             </div>
 
             {/* Card */}

@@ -1,10 +1,23 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
 
 const router = express.Router();
+const BCRYPT_ROUNDS = 10;
 
 const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 const isValidPhone = (value) => /^[0-9]{10}$/.test(value);
+const isBcryptHash = (value) => /^\$2[aby]\$\d{2}\$/.test(String(value || ''));
+
+const verifyPassword = async (plainPassword, storedPassword) => {
+  if (!storedPassword) return false;
+
+  if (isBcryptHash(storedPassword)) {
+    return bcrypt.compare(plainPassword, storedPassword);
+  }
+
+  return storedPassword === plainPassword;
+};
 
 const findLoginAccount = async (email) => {
   const adminCollection = mongoose.connection.db.collection('AdminLogin');
@@ -53,8 +66,8 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials.' });
     }
 
-    // Temporary plain-text check. Replace with bcrypt compare when password hashes are used.
-    if (!account.password || account.password !== password) {
+    const passwordMatched = await verifyPassword(password, account.password);
+    if (!passwordMatched) {
       return res.status(401).json({ message: 'Invalid credentials.' });
     }
 
@@ -115,6 +128,8 @@ router.post('/suppliers', async (req, res) => {
       });
     }
 
+    const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
+
     const now = new Date();
     const supplierDoc = {
       supplierName,
@@ -122,10 +137,11 @@ router.post('/suppliers', async (req, res) => {
       companyName,
       email,
       phone,
-      password,
+      password: hashedPassword,
       gstNumber,
       address,
       products: String(req.body?.products || '').trim(),
+      rating: Number(req.body?.rating || 0),
       role: 'supplier',
       status: 'active',
       createdAt: now,
@@ -169,6 +185,7 @@ router.get('/suppliers', async (req, res) => {
         gstNumber: 1,
         address: 1,
         products: 1,
+        rating: 1,
         status: 1,
         createdAt: 1,
       })
@@ -183,6 +200,7 @@ router.get('/suppliers', async (req, res) => {
       gstNumber: supplier.gstNumber || '',
       address: supplier.address || '',
       products: supplier.products || '',
+      rating: Number(supplier.rating || 0),
       status: supplier.status || 'active',
       createdAt: supplier.createdAt,
     }));
@@ -195,6 +213,47 @@ router.get('/suppliers', async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       message: 'Failed to retrieve suppliers.',
+      error: error.message,
+    });
+  }
+});
+
+router.patch('/suppliers/:supplierId/rating', async (req, res) => {
+  try {
+    const supplierId = String(req.params?.supplierId || '').trim();
+    const rating = Number(req.body?.rating);
+
+    if (!supplierId) {
+      return res.status(400).json({ message: 'Supplier ID is required.' });
+    }
+
+    if (Number.isNaN(rating) || rating < 1 || rating > 5) {
+      return res.status(400).json({ message: 'Rating must be a number between 1 and 5.' });
+    }
+
+    const supplierCollection = mongoose.connection.db.collection('Supplier');
+    const result = await supplierCollection.updateOne(
+      { _id: new mongoose.Types.ObjectId(supplierId) },
+      {
+        $set: {
+          rating,
+          updatedAt: new Date(),
+        },
+      }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ message: 'Supplier not found.' });
+    }
+
+    return res.status(200).json({
+      message: 'Supplier rating updated successfully.',
+      supplierId,
+      rating,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Failed to update supplier rating.',
       error: error.message,
     });
   }

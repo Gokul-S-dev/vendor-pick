@@ -1,8 +1,10 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import { ObjectId } from 'mongodb';
+import bcrypt from 'bcrypt';
 
 const router = express.Router();
+const BCRYPT_ROUNDS = 10;
 
 const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 const isValidPhone = (value) => /^\d{10,15}$/.test(String(value || '').replace(/\D/g, ''));
@@ -53,6 +55,8 @@ router.post('/register', async (req, res) => {
       return res.status(409).json({ message: 'Supplier with this email or phone already exists.' });
     }
 
+    const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
+
     const now = new Date();
     const supplierDoc = {
       supplierName,
@@ -63,7 +67,7 @@ router.post('/register', async (req, res) => {
       address,
       materialsSupplied,
       products: materialsSupplied,
-      password,
+      password: hashedPassword,
       role: 'supplier',
       status: 'active',
       createdAt: now,
@@ -158,7 +162,9 @@ router.put('/profile', async (req, res) => {
       updateFields.materialsSupplied = materialsSupplied;
       updateFields.products = materialsSupplied;
     }
-    if (password && password.trim()) updateFields.password = password.trim();
+    if (password && password.trim()) {
+      updateFields.password = await bcrypt.hash(password.trim(), BCRYPT_ROUNDS);
+    }
 
     const supplierCollection = mongoose.connection.db.collection('Supplier');
 

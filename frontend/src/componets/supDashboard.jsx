@@ -176,6 +176,10 @@ function Dashboard() {
   const [selected,   setSelected]   = useState(null)
   const [filter,     setFilter]     = useState('All')
   const [search,     setSearch]     = useState('')
+  const [supplier,   setSupplier]   = useState({
+    supplierName: 'Supplier',
+    companyName: '',
+  })
 
   useEffect(() => {
     const fetchRfqs = async () => {
@@ -207,6 +211,20 @@ function Dashboard() {
         })
 
         setRfqs(response.data?.rfqs || [])
+
+        // Fetch supplier profile for nav personalization.
+        try {
+          const profileResponse = await axios.get('/api/supplier/profile', {
+            headers: { Authorization: `Bearer ${supplierId}` },
+          })
+
+          setSupplier({
+            supplierName: profileResponse.data?.supplierName || 'Supplier',
+            companyName: profileResponse.data?.companyName || '',
+          })
+        } catch (profileErr) {
+          console.warn('Unable to load supplier profile details:', profileErr?.response?.data || profileErr.message)
+        }
       } catch (err) {
         const errorMsg =
           err.response?.data?.message ||
@@ -231,6 +249,8 @@ function Dashboard() {
       r.rfqId.toLowerCase().includes(search.toLowerCase())
     )
 
+  const avatarInitial = (supplier.supplierName || 'S').trim().charAt(0).toUpperCase()
+
   return (
     <div className="dashboard-root">
       {/* ── Top nav bar ── */}
@@ -240,14 +260,19 @@ function Dashboard() {
           <span className="dash-nav__name">Vendor Pulse</span>
         </div>
         <div className="dash-nav__actions">
+          <div className="dash-nav__user">
+            <p className="dash-nav__user-name">{supplier.supplierName || 'Supplier'}</p>
+            <p className="dash-nav__user-company">{supplier.companyName || 'Vendor Partner'}</p>
+          </div>
           <div className="dash-nav__avatar">
-            <span>S</span>
+            <span>{avatarInitial}</span>
           </div>
           <button
             type="button"
             className="btn dash-nav__logout"
             onClick={() => {
               localStorage.removeItem('supplierToken')
+              localStorage.removeItem('supplierId')
               window.location.href = '/login'
             }}
           >

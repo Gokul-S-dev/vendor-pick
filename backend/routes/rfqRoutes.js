@@ -127,6 +127,8 @@ router.post('/send-to-supplier', async (req, res) => {
       deliveryTime,
       location,
       status: 'Pending',
+      sentBy: 'admin',
+      sentToType: 'specific-supplier',
       createdAt: now,
       updatedAt: now,
     };
@@ -208,6 +210,43 @@ router.get('/supplier/:supplierId', async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       message: 'Failed to retrieve RFQs.',
+      error: error.message,
+    });
+  }
+});
+
+// GET /api/rfq/history - Admin RFQ send history
+router.get('/history', async (_req, res) => {
+  try {
+    const rfqCollection = mongoose.connection.db.collection('RFQ');
+    const rfqs = await rfqCollection
+      .find({ sentBy: 'admin', supplierId: { $exists: true, $ne: '' } })
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    const mappedHistory = rfqs.map((rfq) => ({
+      id: String(rfq._id),
+      rfqId: rfq.rfqId,
+      supplierId: rfq.supplierId,
+      supplierName: rfq.supplierName,
+      product: rfq.product,
+      price: rfq.price,
+      unit: rfq.unit,
+      quantity: rfq.quantity,
+      deliveryTime: rfq.deliveryTime,
+      location: rfq.location,
+      status: rfq.status,
+      createdAt: rfq.createdAt,
+    }));
+
+    return res.status(200).json({
+      message: 'RFQ history retrieved successfully.',
+      history: mappedHistory,
+      count: mappedHistory.length,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Failed to retrieve RFQ history.',
       error: error.message,
     });
   }

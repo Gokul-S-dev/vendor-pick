@@ -164,4 +164,65 @@ router.get('/admin', async (_req, res) => {
 	}
 })
 
+router.patch('/:quotationId/approve', async (req, res) => {
+	try {
+		const quotationId = String(req.params?.quotationId || '').trim()
+
+		if (!quotationId) {
+			return res.status(400).json({ message: 'Quotation ID is required.' })
+		}
+
+		const quotationCollection = mongoose.connection.db.collection('Quotation')
+		const rfqCollection = mongoose.connection.db.collection('RFQ')
+		const notificationCollection = mongoose.connection.db.collection('Notification')
+
+		const targetQuotation = await quotationCollection.findOne({ _id: new mongoose.Types.ObjectId(quotationId) })
+
+		if (!targetQuotation) {
+			return res.status(404).json({ message: 'Quotation not found.' })
+		}
+
+		await quotationCollection.updateOne(
+			{ _id: targetQuotation._id },
+			{
+				$set: {
+					status: 'Accepted',
+					updatedAt: new Date(),
+				},
+			}
+		)
+
+		await rfqCollection.updateOne(
+			{ rfqId: targetQuotation.rfqId },
+			{
+				$set: {
+					status: 'Approved',
+					updatedAt: new Date(),
+				},
+			}
+		)
+
+		await notificationCollection.insertOne({
+			supplierId: targetQuotation.supplierId,
+			type: 'Accepted',
+			message: `Your quotation ${targetQuotation.quotationId} for ${targetQuotation.product} has been approved by admin.`,
+			referenceId: targetQuotation.quotationId,
+			read: false,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		})
+
+		return res.status(200).json({
+			message: 'Quotation approved successfully.',
+			quotationId,
+			status: 'Accepted',
+		})
+	} catch (error) {
+		return res.status(500).json({
+			message: 'Failed to approve quotation.',
+			error: error.message,
+		})
+	}
+})
+
 export default router
