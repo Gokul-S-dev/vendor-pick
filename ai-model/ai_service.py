@@ -88,6 +88,16 @@ def inverse_minmax(value, min_value, max_value):
     return max(0.0, min(1.0, score))
 
 
+def coalesce_number(source, keys, default=0.0):
+    for key in keys:
+        if key in source and source.get(key) not in (None, ""):
+            try:
+                return float(source.get(key))
+            except (TypeError, ValueError):
+                continue
+    return float(default)
+
+
 @app.route("/predict", methods=["POST", "OPTIONS"])
 def predict():
     if request.method == "OPTIONS":
@@ -106,10 +116,12 @@ def predict():
 
     scored_rows = []
     for quote in quote_rows:
-        price = float(quote.get("price", 0) or 0)
-        shipping = float(quote.get("shipping", 0) or 0)
-        delivery_date = float(
-            quote.get("deliveryDate", quote.get("delivery", 0)) or 0
+        price = coalesce_number(quote, ["price", "pricePerUnit"], 0)
+        shipping = coalesce_number(quote, ["shipping", "shippingCost"], 0)
+        delivery_date = coalesce_number(
+            quote,
+            ["deliveryDate", "delivery", "delivery_days", "deliveryLeadTime"],
+            0,
         )
 
         quote_urgency_tag = normalize_urgency_tag(quote.get("urgencyTag", request_urgency_tag))

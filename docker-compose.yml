@@ -1,12 +1,41 @@
 services:
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: dockerfile
     container_name: frontend
     ports:
        - "8080:80"
+    networks:
+      - vendor_network
+    depends_on:
+      - ai
   
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: dockerfile
     container_name: backend
     ports:
       - "3000:3000"
+    depends_on:
+      - frontend
+      - ai
+    networks:
+      - vendor_network
+
+  ai:
+    build:
+      context: ./ai-model
+      dockerfile: dockerfile
+    container_name: ai
+    ports:
+      - "5001:5001"
+    networks:
+      - vendor_network
+    
+
+networks:
+  vendor_network:
+    driver: bridge
+

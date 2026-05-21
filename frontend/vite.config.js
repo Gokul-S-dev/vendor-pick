@@ -10,6 +10,10 @@ export default defineConfig({
         target: 'http://localhost:3000',
         changeOrigin: true,
       },
+      '/predict': {
+        target: 'http://localhost:5001',
+        changeOrigin: true,
+      },
     },
   },
 })

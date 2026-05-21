@@ -53,6 +53,14 @@ function resolveGroupUrgency(items) {
   }, 'Normal')
 }
 
+function resolveAiPredictUrl() {
+  const configuredBase = String(import.meta.env.VITE_AI_URL || '').trim()
+  if (configuredBase) {
+    return configuredBase.replace(/\/+$/, '') + '/predict'
+  }
+  return '/predict'
+}
+
 function AdminQuotations() {
   const [quotations, setQuotations] = useState([])
   const [loading, setLoading] = useState(true)
@@ -198,7 +206,7 @@ function AdminQuotations() {
         })),
       }
 
-      const response = await axios.post('http://localhost:5001/predict', payload)
+      const response = await axios.post(resolveAiPredictUrl(), payload)
       const rows = Array.isArray(response.data?.results)
         ? response.data.results.map((item) => ({
             quotationId: item.quotationId || '',
@@ -450,9 +458,6 @@ function AdminQuotations() {
               const compareEnabled = selectedGroupItems.length >= 2
               const isCompareOpen = activeCompareGroupKey === groupKey && compareEnabled
               const groupUrgencyTag = resolveGroupUrgency(group.items)
-              const selectedUrgencyTag = selectedGroupItems.length > 0
-                ? resolveGroupUrgency(selectedGroupItems)
-                : groupUrgencyTag
 
               return (
               <SwiperSlide key={groupKey}>
