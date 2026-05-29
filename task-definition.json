@@ -1,0 +1,120 @@
+{
+	"version": "1.0",
+	"project": "vendor-pick",
+	"summary": "Tasks for local development, CI and deployment for backend, frontend and ai-model services.",
+	"services": {
+		"backend": {
+			"path": "backend",
+			"dockerfile": "backend/dockerfile",
+			"build_image": "vendor-pick/backend:{{IMAGE_TAG:-dev}}"
+		},
+		"frontend": {
+			"path": "frontend",
+			"dockerfile": "frontend/dockerfile",
+			"build_image": "vendor-pick/frontend:{{IMAGE_TAG:-dev}}"
+		},
+		"ai_model": {
+			"path": "ai-model",
+			"dockerfile": "ai-model/dockerfile",
+			"build_image": "vendor-pick/ai-model:{{IMAGE_TAG:-dev}}"
+		}
+	},
+	"tasks": [
+		{
+			"id": "lint-frontend",
+			"label": "Lint Frontend",
+			"cwd": "frontend",
+			"run": "npm run lint",
+			"description": "Run ESLint in the frontend (if configured)."
+		},
+		{
+			"id": "install-frontend",
+			"label": "Install Frontend Dependencies",
+			"cwd": "frontend",
+			"run": "npm install",
+			"description": "Install frontend dependencies."
+		},
+		{
+			"id": "build-frontend",
+			"label": "Build Frontend",
+			"cwd": "frontend",
+			"run": "npm run build",
+			"description": "Produce production-ready frontend bundle."
+		},
+		{
+			"id": "install-backend",
+			"label": "Install Backend Dependencies",
+			"cwd": "backend",
+			"run": "npm install",
+			"description": "Install backend dependencies."
+		},
+		{
+			"id": "test-backend",
+			"label": "Test Backend",
+			"cwd": "backend",
+			"run": "npm test",
+			"description": "Run backend tests if present."
+		},
+		{
+			"id": "build-backend-image",
+			"label": "Build Backend Docker Image",
+			"cwd": "backend",
+			"run": "docker build -t ${BACKEND_IMAGE:-vendor-pick/backend:${IMAGE_TAG:-dev}} -f dockerfile .",
+			"description": "Builds the backend Docker image (tag adjustable via env)."
+		},
+		{
+			"id": "build-frontend-image",
+			"label": "Build Frontend Docker Image",
+			"cwd": "frontend",
+			"run": "docker build -t ${FRONTEND_IMAGE:-vendor-pick/frontend:${IMAGE_TAG:-dev}} -f dockerfile .",
+			"description": "Builds the frontend Docker image."
+		},
+		{
+			"id": "build-ai-image",
+			"label": "Build AI Model Docker Image",
+			"cwd": "ai-model",
+			"run": "docker build -t ${AI_MODEL_IMAGE:-vendor-pick/ai-model:${IMAGE_TAG:-dev}} -f dockerfile .",
+			"description": "Builds the ai-model Docker image used by the service."
+		},
+		{
+			"id": "compose-up",
+			"label": "Start Local Stack",
+			"cwd": ".",
+			"run": "docker-compose up --build",
+			"description": "Start the entire stack with docker-compose for local development."
+		},
+		{
+			"id": "compose-down",
+			"label": "Stop Local Stack",
+			"cwd": ".",
+			"run": "docker-compose down",
+			"description": "Stop and remove containers created by docker-compose."
+		},
+		{
+			"id": "build-and-push",
+			"label": "Build & Push Images",
+			"cwd": ".",
+			"commands": [
+				"docker build -t ${DOCKER_REGISTRY}/${BACKEND_IMAGE:-vendor-pick/backend:${IMAGE_TAG:-latest}} -f backend/dockerfile backend",
+				"docker build -t ${DOCKER_REGISTRY}/${FRONTEND_IMAGE:-vendor-pick/frontend:${IMAGE_TAG:-latest}} -f frontend/dockerfile frontend",
+				"docker build -t ${DOCKER_REGISTRY}/${AI_MODEL_IMAGE:-vendor-pick/ai-model:${IMAGE_TAG:-latest}} -f ai-model/dockerfile ai-model",
+				"docker push ${DOCKER_REGISTRY}/${BACKEND_IMAGE:-vendor-pick/backend:${IMAGE_TAG:-latest}}",
+				"docker push ${DOCKER_REGISTRY}/${FRONTEND_IMAGE:-vendor-pick/frontend:${IMAGE_TAG:-latest}}",
+				"docker push ${DOCKER_REGISTRY}/${AI_MODEL_IMAGE:-vendor-pick/ai-model:${IMAGE_TAG:-latest}}"
+			],
+			"env": ["DOCKER_REGISTRY","IMAGE_TAG"],
+			"description": "Build and push images to a container registry. Requires DOCKER_REGISTRY and IMAGE_TAG environment variables."
+		}
+	],
+	"ci_pipeline": [
+		"install-frontend",
+		"lint-frontend",
+		"build-frontend",
+		"install-backend",
+		"test-backend",
+		"build-backend-image",
+		"build-frontend-image",
+		"build-ai-image"
+	],
+	"notes": "Adjust `run` strings if your npm scripts or dockerfile names differ. Set env vars DOCKER_REGISTRY and IMAGE_TAG in CI. Use `docker-compose.yml` root file for local orchestration."
+}
