@@ -97,7 +97,7 @@ function SupLogin() {
       setLoading(true)
       setServerError('')
 
-      const response = await axios.post('http://backend:3000/api/admin/login', formData)
+      const response = await axios.post('/api/admin/login', formData)
       const token = response?.data?.token
       const role = response?.data?.role
       const redirectTo = response?.data?.redirectTo
