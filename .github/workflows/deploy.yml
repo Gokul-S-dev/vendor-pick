@@ -17,6 +17,7 @@ jobs:
             - name: Stop existing containers
               run: docker compose down
 
+
             - name: Build Image
               run: docker compose build
 
