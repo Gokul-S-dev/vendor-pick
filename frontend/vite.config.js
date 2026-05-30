@@ -7,11 +7,11 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'http://51.20.89.225:3000',
         changeOrigin: true,
       },
       '/predict': {
-        target: 'http://localhost:5001',
+        target: 'http://51.20.89.225:5001',
         changeOrigin: true,
       },
     },
