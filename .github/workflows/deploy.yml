@@ -15,13 +15,13 @@ jobs:
               run: git pull origin main
 
             - name: Stop existing containers
-              run: docker-compose down
+              run: docker compose down
 
             - name: Build Image
-              run: docker-compose build
+              run: docker compose build
 
             - name: Start Containers
-              run: docker-compose up -d
+              run: docker compose up -d
 
             - name: Remove used images
               run: docker image prune -f
