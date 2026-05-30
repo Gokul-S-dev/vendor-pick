@@ -1,0 +1,27 @@
+name: Deploy Docker Compose
+
+on: 
+    push:
+        branches:
+            - main
+jobs:
+    deploy:
+        runs-on: self-hosted
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
+
+            - name: Pull latest changes
+              run: git pull origin main
+
+            - name: Stop existing containers
+              run: docker-compose down
+
+            - name: Build Image
+              run: docker-compose build
+
+            - name: Start Containers
+              run: docker-compose up -d
+
+            - name: Remove used images
+              run: docker image prune -f
