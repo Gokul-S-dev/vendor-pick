@@ -1,17 +1,18 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-
+const backend =import.meta.env.BACKEND;
+const ai = import.meta.env.AI;
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
       '/api': {
-        target: 'http://51.20.89.225:3000',
+        target: `${backend}`,
         changeOrigin: true,
       },
       '/predict': {
-        target: 'http://51.20.89.225:5001',
+        target: `${ai}`,
         changeOrigin: true,
       },
     },

@@ -17,6 +17,13 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
+app.get('/api/health', (req, res) => {
+  return res.status(200).json({
+    message: 'Vendor-Pick backend is running.',
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+  });
+});
 app.use('/api/admin', adminAuthRoutes);
 app.use('/api/rfq', rfqRoutes);
 app.use('/api/quotation', quotationRoutes);
